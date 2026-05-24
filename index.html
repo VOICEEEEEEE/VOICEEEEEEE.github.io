@@ -1830,8 +1830,7 @@
   .hero-latest-card:hover::after {
     opacity: 0.4;
   }
-  @keyframes gradientShift {
-    0%, 100% { background-position: 0% 50%; }
+  
     50% { background-position: 100% 50%; }
   }
 
@@ -2449,6 +2448,10 @@
 
 
 
+
+
+
+
 /* ═══ ИНТЕРАКТИВНЫЕ ЧАСТИЦЫ ═══ */
 #particleCanvas {
   position: fixed;
@@ -2463,6 +2466,8 @@
 <base target="_blank">
 </head>
 <body>
+<canvas id="particleCanvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.7;"></canvas>
+
 
 
 
@@ -2838,7 +2843,6 @@
   </div>
 </div>
 
-<canvas id="particleCanvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
 <script>
 // ─── SUPABASE CONFIG ──────────────────────────────────────
 // Замени эти два значения своими из Supabase → Project Settings → API
@@ -3876,13 +3880,29 @@ setTimeout(() => {
 </script>
 
 
+
+
+
+
+
+
+
+
+
+
+
+<!-- ═══ ИНТЕРАКТИВНЫЕ ЧАСТИЦЫ ═══ -->
+
+
+
+<script>
 // ═══ ИНТЕРАКТИВНЫЕ ЧАСТИЦЫ ═══
 (function(){
-  const canvas = document.getElementById('particleCanvas');
+  var canvas = document.getElementById('particleCanvas');
   if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let particles = [];
-  let mouse = { x: null, y: null };
+  var ctx = canvas.getContext('2d');
+  var particles = [];
+  var mouse = { x: null, y: null };
 
   function resize() {
     canvas.width = window.innerWidth;
@@ -3892,8 +3912,8 @@ setTimeout(() => {
   window.addEventListener('resize', resize);
 
   window.addEventListener('mousemove', function(e) {
-    mouse.x = e.x;
-    mouse.y = e.y;
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
   });
 
   window.addEventListener('mouseleave', function() {
@@ -3972,18 +3992,6 @@ setTimeout(() => {
   animate();
 })();
 // ═══ /ИНТЕРАКТИВНЫЕ ЧАСТИЦЫ ═══
-
-
-
-
-
-
-
-
-
-
-<!-- ═══ ИНТЕРАКТИВНЫЕ ЧАСТИЦЫ ═══ -->
-
-
+</script>
 </body>
 </html>
