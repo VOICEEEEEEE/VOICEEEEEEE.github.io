@@ -492,9 +492,27 @@
     margin: 0 auto;
     padding: 0 2rem 24px;
     display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: nowrap;
+  }
+  .filters-left {
+    display: flex;
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
+    flex: 1;
+    min-width: 0;
+  }
+  .filters-left .filter-label {
+    margin-right: 4px;
+  }
+  .filters-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
   }
 
   .filter-label {
@@ -869,14 +887,20 @@
     background: rgba(0,0,0,0.75);
     backdrop-filter: blur(8px);
     z-index: 100;
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .modal-overlay.open {
-    display: flex;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
   }
 
   .modal {
@@ -1108,18 +1132,24 @@
 
   .empty-sub { font-size: 14px; color: var(--text3); }
 
+  
+  /* Search desktop/mobile visibility */
+  .search-desktop { display: flex; align-items: center; }
+  .search-mobile { display: none; width: 100%; }
+  .search-mobile .search-bar { width: 100%; }
+  .search-mobile .search-bar input { width: 100%; display: block !important; }
+
   /* Responsive */
 @media (max-width: 768px) {
   /* Header */
   header { width: 100%; }
   .header-inner { width: 100%; padding: 0 16px; gap: 8px; }
   nav { display: none; }
-  .search-bar input { display: none; }
-  .search-bar.expanded { position: absolute; left: 16px; right: 16px; top: 12px; z-index: 100; background: var(--bg3); border-color: var(--accent); }
-  .search-bar.expanded input { display: block; width: 100%; }
+  .search-desktop { display: none !important; }
+  .search-mobile { display: block !important; }
   .header-right { gap: 6px; }
   .search-bar { flex: 1; min-width: 0; }
-  .search-bar input { width: 100%; font-size: 12px; }
+  .search-bar input { width: 100%; font-size: 12px; display: block !important; }
   .upload-btn { font-size: 11px; padding: 6px 10px; }
   .admin-badge { font-size: 10px; padding: 4px 8px; }
   #loginBtn { font-size: 11px; padding: 6px 10px; }
@@ -1155,11 +1185,16 @@
   }
 
   /* Filters */
-  .filters-bar { padding: 12px 16px; gap: 8px; flex-wrap: wrap; }
+  .filters-bar { padding: 12px 16px; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
+  .filters-left { flex-wrap: wrap; gap: 6px; flex: 1; min-width: 0; }
+  .filters-right { flex-shrink: 0; align-self: flex-start; margin-top: 18px; }
   .filter-chips { gap: 6px; flex-wrap: wrap; }
-  .chip { font-size: 11px; padding: 5px 12px; }
-  .filter-label { font-size: 10px; }
-  select { font-size: 12px; padding: 5px 10px; }
+  .chip { font-size: 11px; padding: 5px 10px; }
+  .filter-label { font-size: 10px; width: 100%; margin-bottom: 2px; }
+  .filter-sep { display: none; }
+  .sort-select { font-size: 12px; padding: 5px 10px; }
+  .search-mobile { width: 100%; margin-top: 4px; }
+  .search-mobile .search-bar { width: 100%; }
 
   /* Grid — одна колонка на всю ширину */
   #videoGrid {
@@ -1227,11 +1262,13 @@
     align-items: center;
     justify-content: center;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.25s;
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .auth-modal-overlay.open {
     opacity: 1;
+    visibility: visible;
     pointer-events: all;
   }
   .auth-modal {
@@ -1524,16 +1561,23 @@
 .support-btn svg { width: 22px; height: 22px; fill: none; stroke: #d4537e; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
  
 .support-overlay {
-  display: none;
+  display: flex;
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.6);
   z-index: 9999;
   align-items: center;
   justify-content: center;
-  pointer-events: auto
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.support-overlay.open { display: flex; }
+.support-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
  
 .support-modal {
   background: var(--bg2, #111118);
@@ -1548,16 +1592,33 @@
  
 .support-modal-close {
   position: absolute;
-  top: 12px; right: 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(255,255,255,0.12);
   color: var(--text2, #9c98b4);
-  font-size: 20px;
+  cursor: pointer;
+  font-size: 18px;
   line-height: 1;
-  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
 }
-.support-modal-close:hover { color: var(--text, #f0eef8); }
+.support-modal-close:hover {
+  border-color: var(--pink);
+  background: var(--pink-dim);
+  color: var(--pink);
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: 0 0 0 3px rgba(244,114,182,0.12), 0 0 20px rgba(244,114,182,0.25);
+}
+.support-modal-close:active {
+  transform: rotate(90deg) scale(0.95);
+}
  
 .support-modal-title {
   font-size: 16px;
@@ -2288,30 +2349,6 @@
     box-shadow: 0 0 15px rgba(244,114,182,0.3);
   }
 
-  /* Крестик плеера — правильное позиционирование и обводка */
-  .player-x {
-    position: relative !important;
-    top: auto !important;
-    right: auto !important;
-    margin-bottom: 12px;
-    align-self: flex-end;
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    border: 1.5px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.06);
-  }
-  .player-x:hover {
-    border-color: var(--accent);
-    background: var(--accent-dim);
-    color: var(--accent);
-    transform: rotate(90deg) scale(1.1);
-    box-shadow: 0 0 0 3px rgba(192,132,252,0.12), 0 0 20px rgba(192,132,252,0.25);
-  }
-  .player-x:active {
-    transform: rotate(90deg) scale(0.95);
-  }
-
   /* Плавный hover для icon-btn */
   .icon-btn {
     transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -2457,6 +2494,13 @@
     90% { transform: translate(-2%, -1%); }
   }
 
+  
+  /* Search desktop/mobile visibility */
+  .search-desktop { display: flex; align-items: center; }
+  .search-mobile { display: none; width: 100%; }
+  .search-mobile .search-bar { width: 100%; }
+  .search-mobile .search-bar input { width: 100%; display: block !important; }
+
   /* Responsive */
   @media (max-width: 768px) {
     .orb { display: none; }
@@ -2505,9 +2549,11 @@
     </nav>
 
       <div class="header-right">
-        <div class="search-bar" onclick="this.classList.toggle('expanded');this.querySelector('input').focus()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" id="searchInput" placeholder="search vods…" oninput="filterCards()">
+        <div class="search-desktop">
+        <div class="search-bar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="searchInput" placeholder="search vods…" oninput="filterCards()">
+        </div>
       </div>
         <button class="upload-btn" id="uploadBtn" onclick="openModal()" style="display:none">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -2609,20 +2655,30 @@
 
 <!-- FILTERS -->
 <div class="filters-bar">
-  <span class="filter-label">filter</span>
-  <div class="filter-chips">
-    <span class="chip active" onclick="filterByTag('all', this)">all</span>
-    <span class="chip" onclick="filterByTag('gaming', this)">gaming</span>
-    <span class="chip" onclick="filterByTag('film', this)">film</span>
-    <span class="chip" onclick="filterByTag('irl', this)">irl</span>
-    <span class="chip" onclick="filterByTag('just chatting', this)">just chatting</span>
+  <div class="filters-left">
+    <span class="filter-label">filter</span>
+    <div class="filter-chips">
+      <span class="chip active" onclick="filterByTag('all', this)">all</span>
+      <span class="chip" onclick="filterByTag('gaming', this)">gaming</span>
+      <span class="chip" onclick="filterByTag('film', this)">film</span>
+      <span class="chip" onclick="filterByTag('irl', this)">irl</span>
+      <span class="chip" onclick="filterByTag('just chatting', this)">just chatting</span>
+    </div>
+    <div class="search-mobile">
+      <div class="search-bar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInputMobile" placeholder="search vods…" oninput="filterCards()">
+      </div>
+    </div>
   </div>
-  <div class="filter-sep"></div>
-  <select class="sort-select" onchange="sortCards(this.value)">
-    <option value="newest">newest first</option>
-    <option value="oldest">oldest first</option>
-    <option value="views">most viewed</option>
-  </select>
+  <div class="filters-right">
+    <div class="filter-sep"></div>
+    <select class="sort-select" onchange="sortCards(this.value)">
+      <option value="newest">newest first</option>
+      <option value="oldest">oldest first</option>
+      <option value="views">most viewed</option>
+    </select>
+  </div>
 </div>
 
 <!-- MAIN GRID -->
@@ -3136,7 +3192,9 @@ function sortCards(val) {
 
 function filterCards() {
   visibleCount = 3;
-  searchQuery = document.getElementById('searchInput').value;
+  const desktopInput = document.getElementById('searchInput');
+  const mobileInput = document.getElementById('searchInputMobile');
+  searchQuery = (desktopInput ? desktopInput.value : '') || (mobileInput ? mobileInput.value : '');
   renderGrid();
 }
 
@@ -3544,6 +3602,10 @@ function closeAuthModal() {
   }, 350);
 }
 
+function closeSupport() {
+  document.getElementById('supportOverlay').classList.remove('open');
+}
+
 async function submitAuth() {
   const email = document.getElementById('authEmail').value.trim();
   const pw = document.getElementById('authPassword').value;
@@ -3658,27 +3720,6 @@ async function init() {
 init();
 
 
-// === ПЛАВНЫЕ АНИМАЦИИ ЗАКРЫТИЯ (добавлено поверх существующего кода) ===
-// Переопределяем close-функции для плавной анимации перед закрытием
-
-const _origCloseModal = closeModal;
-closeModal = function() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  setTimeout(_origCloseModal, 350);
-};
-
-const _origCloseAuth = closeAuthModal;
-closeAuthModal = function() {
-  document.getElementById('authOverlay').classList.remove('open');
-  setTimeout(_origCloseAuth, 350);
-};
-
-const _origClosePlayer = closePlayer;
-closePlayer = function() {
-  document.getElementById('playerOverlay').classList.remove('open');
-  setTimeout(_origClosePlayer, 350);
-};
-
 // Плавный скролл для якорных ссылок
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function(e) {
@@ -3695,7 +3736,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 <!-- Модальное окно поддержки -->
 <div class="support-overlay" id="supportOverlay" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="support-modal">
-    <button class="support-modal-close" onclick="document.getElementById('supportOverlay').classList.remove('open')">×</button>
+    <button class="support-modal-close" onclick="closeSupport()">×</button>
     <p class="support-modal-title">Поддержать создателя сайта ♡</p>
     <p class="support-modal-sub">Выбери удобный способ</p>
 
