@@ -3,7 +3,7 @@
 <head>
 <link rel="icon" type="image/png" href="https://i.imgur.com/FLcgea4.jpeg">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>cutierover - stream archive</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -34,7 +34,7 @@
     --font-mono: 'DM Mono', monospace;
   }
 
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; overflow-x: hidden; }
 
   body {
     background: var(--bg);
@@ -68,7 +68,7 @@
     opacity: 0.18;
   }
   .orb-1 { width: 600px; height: 600px; top: -200px; left: -100px; background: #7c3aed; }
-  .orb-2 { width: 400px; height: 400px; bottom: 200px; right: -150px; background: #db2777; }
+  .orb-2 { width: 400px; height: 400px; bottom: 200px; right: -150px; background: #db2777; max-width: none; }
   .orb-3 { width: 300px; height: 300px; top: 40%; left: 40%; background: #4f46e5; opacity: 0.1; }
 
   /* ── HEADER ── */
@@ -82,10 +82,11 @@
   }
 
   .header-inner {
-    max-width: none;
+    max-width: 1280px;
     margin: 0 auto;
     height: 64px;
     display: flex;
+    position: relative;
     align-items: center;
     justify-content: space-between;
   }
@@ -182,11 +183,9 @@
   .hero {
     position: relative;
     z-index: 1;
-    max-width: none;
+    max-width: 1280px;
     margin: 0 auto;
     padding: 48px 2rem 32px;
-    padding-left: 240px;
-    padding-right: 240px;
   }
 
   .hero-profile {
@@ -336,15 +335,10 @@
     font-size: 10px;
   }
 
-  @media (max-width: 900px) {
-    .hero-layout { grid-template-columns: 1fr; }
-    .hero-right { display: none; }
-  }
-
-  .avatar-ring {
-    position: relative;
-    flex-shrink: 0;
-  }
+.avatar-ring {
+  position: relative;
+  flex-shrink: 0;
+}
 
   .avatar-ring::before {
     content: '';
@@ -494,9 +488,9 @@
   .filters-bar {
     position: relative;
     z-index: 5;
-    max-width: none;
+    max-width: 1280px;
     margin: 0 auto;
-    padding: 0 240px 24px;
+    padding: 0 2rem 24px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -595,9 +589,9 @@
   main {
     position: relative;
     z-index: 1;
-    max-width: none;
+    max-width: 1280px;
     margin: 0 auto;
-    padding: 0 240px 40px;
+    padding: 0 2rem 40px;
   }
 
   .section-header {
@@ -1115,77 +1109,99 @@
   .empty-sub { font-size: 14px; color: var(--text3); }
 
   /* Responsive */
-  @media (max-width: 768px) {
-    /* Header */
-    .header-inner { padding: 0 16px; gap: 8px; }
-    .header-logo { font-size: 15px; }
-    .header-logo img, .header-logo .avatar-small { width: 28px; height: 28px; }
-    nav { display: none; }
-    .header-right { gap: 6px; }
-    .search-bar { width: 130px; }
-    .search-bar input { font-size: 12px; }
-    .upload-btn { font-size: 11px; padding: 6px 10px; }
-    .admin-badge { font-size: 10px; padding: 4px 8px; }
-    #loginBtn { font-size: 11px; padding: 6px 10px; }
+@media (max-width: 768px) {
+  /* Header */
+  header { width: 100%; }
+  .header-inner { width: 100%; padding: 0 16px; gap: 8px; }
+  nav { display: none; }
+  .search-bar input { display: none; }
+  .search-bar.expanded { position: absolute; left: 16px; right: 16px; top: 12px; z-index: 100; background: var(--bg3); border-color: var(--accent); }
+  .search-bar.expanded input { display: block; width: 100%; }
+  .header-right { gap: 6px; }
+  .search-bar { flex: 1; min-width: 0; }
+  .search-bar input { width: 100%; font-size: 12px; }
+  .upload-btn { font-size: 11px; padding: 6px 10px; }
+  .admin-badge { font-size: 10px; padding: 4px 8px; }
+  #loginBtn { font-size: 11px; padding: 6px 10px; }
 
-    /* Hero */
-    .hero { padding: 40px 16px 32px; }
-    .hero-profile { flex-direction: column; align-items: flex-start; gap: 16px; }
-    h1 { font-size: 2rem; }
-    .hero-desc { font-size: 13px; }
-    .hero-stats { gap: 20px; }
-    .stat-num { font-size: 1.6rem; }
+  /* Hero */
+  .hero { padding: 24px 16px; }
+  .hero-layout { grid-template-columns: 1fr; }
+  .hero-right { display: none; }
+  .hero-profile { flex-direction: column; align-items: flex-start; gap: 16px; }
+  h1 { font-size: 2rem; }
+  .hero-desc { font-size: 13px; }
+  .hero-stats { gap: 20px; }
+  .stat-num { font-size: 1.6rem; }
+  .avatar { width: 100px; height: 100px; }
+  .hero-desc { max-width: 100%; }
+  .hero-info { min-width: 0; overflow: hidden; }
 
-    /* Twitch + Telegram buttons — в ряд на мобилке */
-    .hero-info > div:has(.twitch-link),
-    .twitch-link { display: inline-flex; }
-    .twitch-link { font-size: 12px; padding: 8px 12px; margin-left: 0 !important; margin-top: 0; }
-    .hero-info { display: flex; flex-direction: column; gap: 16px; }
-    .hero-buttons { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  /* Кнопки — одинаковые, в ряд */
+.hero-buttons {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  width: 100%;
+  gap: 8px;
+  padding-top: 16px !important;
+}
+  .hero-buttons .twitch-link {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+    font-size: 11px !important;
+    padding: 10px 6px !important;
+    white-space: nowrap;
+  }
 
-    /* Filters */
-    .filters-bar { padding: 12px 16px; gap: 8px; flex-wrap: wrap; }
-    .filter-chips { gap: 6px; flex-wrap: wrap; }
-    .chip { font-size: 11px; padding: 5px 12px; }
-    .filter-label { font-size: 10px; }
-    select { font-size: 12px; padding: 5px 10px; }
+  /* Filters */
+  .filters-bar { padding: 12px 16px; gap: 8px; flex-wrap: wrap; }
+  .filter-chips { gap: 6px; flex-wrap: wrap; }
+  .chip { font-size: 11px; padding: 5px 12px; }
+  .filter-label { font-size: 10px; }
+  select { font-size: 12px; padding: 5px 10px; }
 
-    /* Grid — одна колонка */
-    .vod-grid, .video-grid { grid-template-columns: 1fr; gap: 12px; padding: 0 16px 16px; }
-    .vod-card { border-radius: 12px; }
-    .vod-thumb { height: 180px; }
+  /* Grid — одна колонка на всю ширину */
+  #videoGrid {
+    grid-template-columns: 1fr !important;
+    padding: 0 16px 16px !important;
+  }
+  .vod-card { border-radius: 12px; }
+  .vod-thumb { height: 200px; }
 
-    /* Section header */
-    .section-header { padding: 16px 16px 12px; }
-    .section-title { font-size: 1.4rem; }
+  /* Section header */
+  .section-header { padding: 16px 16px 12px; }
+  .section-title { font-size: 1.4rem; }
 
-    /* About page */
-    .about-section { padding: 24px 16px; }
-    .about-container { padding: 20px 16px; border-radius: 14px; }
-    .about-header { flex-direction: column; gap: 12px; }
-    .about-avatar { width: 56px; height: 56px; }
-    .about-name h2 { font-size: 18px; }
-    .about-cards { grid-template-columns: 1fr 1fr; gap: 8px; }
-    .about-card { padding: 12px; }
-    .about-links { gap: 8px; }
-    .about-link-btn { font-size: 12px; padding: 7px 12px; }
+  /* About */
+  .about-section { padding: 24px 16px; }
+  .about-container { padding: 20px 16px; border-radius: 14px; }
+  .about-header { flex-direction: column; gap: 12px; }
+  .about-avatar { width: 56px; height: 56px; }
+  .about-name h2 { font-size: 18px; }
+  .about-cards { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .about-card { padding: 12px; }
+  .about-links { gap: 8px; }
+  .about-link-btn { font-size: 12px; padding: 7px 12px; }
 
-    /* Player modal */
-    .player-modal { padding: 12px; border-radius: 12px; }
-    .player-header { margin-bottom: 10px; }
-    .player-title { font-size: 15px; }
+  /* Modals */
+  .player-modal { padding: 12px; border-radius: 12px; }
+  .player-title { font-size: 15px; }
+  .modal-content { padding: 20px 16px; border-radius: 14px; margin: 10px; }
+  .form-row { grid-template-columns: 1fr; }
+  .modal-title { font-size: 18px; }
+  .auth-modal { padding: 24px 16px; border-radius: 14px; margin: 16px; }
+  .auth-title { font-size: 18px; }
 
-    /* Upload modal */
-    .modal-content { padding: 20px 16px; border-radius: 14px; margin: 10px; }
-    .form-row { grid-template-columns: 1fr; }
-    .modal-title { font-size: 18px; }
+  /* Footer */
+  footer { flex-direction: column; gap: 8px; text-align: center; padding: 20px 16px; }
+}
 
-    /* Auth modal */
-    .auth-modal { padding: 24px 16px; border-radius: 14px; margin: 16px; }
-    .auth-title { font-size: 18px; }
+/* Avatar — меньше на мобилке */
+.avatar { width: 100px; height: 100px; }
 
-    /* Footer */
-    footer { flex-direction: column; gap: 8px; text-align: center; padding: 20px 16px; }
+/* Hero layout — убираем лишний отступ */
+.hero { padding: 24px 16px 24px; }
   }
 
   .hero-buttons {
@@ -1614,143 +1630,796 @@
   white-space: nowrap;
 }
 .support-copy-btn:hover { background: rgba(255,255,255,0.07); }
-@keyframes wave {
-  0%, 100% { height: 4px; }
-  50% { height: 24px; }
-}
 
-html, body {
-  background:
-    radial-gradient(circle at top left, rgba(124,58,237,0.18), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(219,39,119,0.14), transparent 30%),
-    #07070c;
-}
+  /* === ПЛАВНЫЕ АНИМАЦИИ === */
 
-body {
-  background-attachment: fixed;
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255,255,255,0.03);
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #7c3aed, #db2777);
-  border-radius: 999px;
-}
-
-header {
-  position: sticky;
-  top: 0;
-}
-
-.left-sidebar-fixed {
-  position: fixed !important;
-  left: 0;
-  top: 64px;
-  bottom: 0;
-  width: 220px;
-  height: auto !important;
-  min-height: 0 !important;
-  overflow-y: auto;
-  overflow-x: hidden;
-  background:
-    linear-gradient(180deg, rgba(10,10,15,0.96), rgba(7,7,12,0.92));
-  box-shadow: inset -1px 0 0 rgba(255,255,255,0.06);
-}
-
-.left-sidebar-fixed::after {
-  content: '';
-  position: fixed;
-  left: 219px;
-  top: 64px;
-  bottom: 0;
-  width: 1px;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgba(192,132,252,0.35),
-    transparent
-  );
-  pointer-events: none;
-}
-
-.hero,
-.filters-bar,
-main {
-  position: relative;
-}
-
-.hero::before,
-main::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 28px;
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.015),
-    rgba(255,255,255,0)
-  );
-  pointer-events: none;
-}
-
-.vod-card,
-.hero-latest-card,
-.hero-stat-box,
-.about-container {
-  backdrop-filter: blur(18px);
-  box-shadow:
-    0 10px 40px rgba(0,0,0,0.35),
-    inset 0 1px 0 rgba(255,255,255,0.03);
-}
-
-.vod-card:hover,
-.hero-latest-card:hover {
-  box-shadow:
-    0 14px 48px rgba(124,58,237,0.18),
-    0 0 0 1px rgba(192,132,252,0.08);
-}
-
-@media (max-width: 1400px) {
-  .hero,
-  .filters-bar,
-  main {
-    padding-left: 260px !important;
-    padding-right: 40px !important;
+  /* Плавное появление модальных окон */
+  .modal-overlay {
+    opacity: 0;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex !important;
+    pointer-events: none;
   }
-}
-
-@media (max-width: 1100px) {
-  .left-sidebar-fixed {
-    transform: translateX(-100%);
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .modal-overlay:not(.open) .modal {
+    transform: scale(0.92) translateY(20px);
+    opacity: 0;
+  }
+  .modal-overlay.open .modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  .modal {
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .hero,
-  .filters-bar,
-  main {
-    padding-left: 24px !important;
-    padding-right: 24px !important;
+  /* Auth modal плавность */
+  .auth-modal-overlay {
+    opacity: 0;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex !important;
+    pointer-events: none;
   }
-}
+  .auth-modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .auth-modal-overlay:not(.open) .auth-modal {
+    transform: scale(0.92) translateY(20px);
+    opacity: 0;
+  }
+  .auth-modal-overlay.open .auth-modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  .auth-modal {
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
+  /* Support modal плавность */
+  .support-overlay {
+    opacity: 0;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex !important;
+    pointer-events: none;
+  }
+  .support-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .support-overlay:not(.open) .support-modal {
+    transform: scale(0.92) translateY(20px);
+    opacity: 0;
+  }
+  .support-overlay.open .support-modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  .support-modal {
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
+  /* === УЛУЧШЕННЫЕ СВЕЧЕНИЯ === */
 
-iframe {
-  backdrop-filter: blur(12px);
-}
+  /* Обновленные градиентные шары с анимацией */
+  .orb {
+    transition: all 0.8s ease;
+    filter: blur(100px);
+    opacity: 0.22;
+  }
+  .orb-1 {
+    width: 700px; height: 700px;
+    top: -250px; left: -150px;
+    background: radial-gradient(circle, #7c3aed 0%, #4c1d95 60%, transparent 100%);
+    animation: orbFloat1 12s ease-in-out infinite;
+  }
+  .orb-2 {
+    width: 500px; height: 500px;
+    bottom: 100px; right: -200px;
+    background: radial-gradient(circle, #db2777 0%, #9d174d 60%, transparent 100%);
+    animation: orbFloat2 15s ease-in-out infinite;
+  }
+  .orb-3 {
+    width: 400px; height: 400px;
+    top: 45%; left: 35%;
+    background: radial-gradient(circle, #4f46e5 0%, #312e81 60%, transparent 100%);
+    opacity: 0.15;
+    animation: orbFloat3 18s ease-in-out infinite;
+  }
+  /* Новый шар */
+  .orb-4 {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    width: 350px; height: 350px;
+    bottom: -100px; left: 20%;
+    background: radial-gradient(circle, #c084fc 0%, #7c3aed 60%, transparent 100%);
+    opacity: 0.12;
+    animation: orbFloat4 20s ease-in-out infinite;
+  }
+
+  @keyframes orbFloat1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(60px, 40px) scale(1.1); }
+    66% { transform: translate(-30px, 80px) scale(0.95); }
+  }
+  @keyframes orbFloat2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-50px, -60px) scale(1.15); }
+    66% { transform: translate(30px, -30px) scale(0.9); }
+  }
+  @keyframes orbFloat3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(40px, -50px) scale(1.1); }
+  }
+  @keyframes orbFloat4 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-40px, -30px) scale(1.2); }
+  }
+
+  /* Светящиеся границы для карточек при hover */
+  .vod-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 15px;
+    padding: 1px;
+    background: linear-gradient(135deg, transparent 40%, rgba(192,132,252,0.3) 50%, transparent 60%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .vod-card:hover::before {
+    opacity: 1;
+    animation: borderGlow 2s ease-in-out infinite;
+  }
+  @keyframes borderGlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Светящийся эффект для hero-latest-card */
+  .hero-latest-card::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--pink), var(--accent));
+    background-size: 200% 200%;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
+    filter: blur(8px);
+    animation: gradientShift 3s ease infinite;
+  }
+  .hero-latest-card:hover::after {
+    opacity: 0.4;
+  }
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Пульсирующее свечение для live индикатора */
+  @keyframes livePulse {
+    0%, 100% { box-shadow: 0 0 4px var(--live), 0 0 8px var(--live), 0 0 12px var(--live); }
+    50% { box-shadow: 0 0 8px var(--live), 0 0 16px var(--live), 0 0 24px var(--live); }
+  }
+
+  /* Светящийся аватар */
+  .avatar-ring::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--pink), var(--accent));
+    background-size: 200% 200%;
+    z-index: 0;
+    animation: avatarGlow 4s ease infinite;
+    filter: blur(3px);
+    opacity: 0.8;
+  }
+  @keyframes avatarGlow {
+    0%, 100% { background-position: 0% 50%; filter: blur(3px) brightness(1); }
+    50% { background-position: 100% 50%; filter: blur(5px) brightness(1.3); }
+  }
+
+  /* Светящийся эффект для кнопок */
+  .upload-btn {
+    position: relative;
+    overflow: hidden;
+  }
+  .upload-btn::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #7c3aed, #db2777, #7c3aed);
+    background-size: 200% 200%;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    filter: blur(6px);
+    animation: gradientShift 3s ease infinite;
+  }
+  .upload-btn:hover::before {
+    opacity: 0.6;
+  }
+
+  /* Светящийся эффект для twitch-link кнопок */
+  .twitch-link {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .twitch-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(145,71,255,0.25);
+  }
+
+  /* Плавные переходы для всех интерактивных элементов */
+  .chip, .icon-btn, .about-link-btn, .support-da-btn, .support-copy-btn, .modal-close, .support-modal-close {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Улучшенный hover для карточек */
+  .vod-card {
+    transition: border-color 0.3s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  }
+  .vod-card:hover {
+    box-shadow: 0 8px 32px rgba(192,132,252,0.08), 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  /* Плавный скроллбар */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--bg4);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+  }
+
+  /* Плавное появление секций при скролле */
+  .hero, .filters-bar, main, .about-section, footer {
+    animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+  .hero { animation-delay: 0.1s; }
+  .filters-bar { animation-delay: 0.2s; }
+  main { animation-delay: 0.3s; }
+  .about-section { animation-delay: 0.4s; }
+  footer { animation-delay: 0.5s; }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Улучшенный эффект для about-section */
+  .about-container {
+    position: relative;
+    overflow: hidden;
+  }
+  .about-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 30%, rgba(192,132,252,0.03) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(219,39,119,0.03) 0%, transparent 50%);
+    animation: aboutGlow 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes aboutGlow {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg); }
+  }
+
+  /* Светящийся эффект для стат-боксов */
+  .hero-stat-box {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .hero-stat-box::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(192,132,252,0.05), transparent);
+    transition: left 0.6s ease;
+  }
+  .hero-stat-box:hover::after {
+    left: 100%;
+  }
+  .hero-stat-box:hover {
+    border-color: var(--border2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(192,132,252,0.06);
+  }
+
+  /* Улучшенный drop zone */
+  .drop-zone {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .drop-zone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(192,132,252,0.08) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .drop-zone:hover::before, .drop-zone.dragover::before {
+    opacity: 1;
+  }
+
+  /* Плавный progress bar */
+  .progress-fill {
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(192,132,252,0.5);
+  }
+
+  /* Светящийся input при фокусе */
+  .form-input:focus {
+    box-shadow: 0 0 0 3px rgba(192,132,252,0.15), 0 0 20px rgba(192,132,252,0.08);
+  }
+
+  /* Улучшенный search bar */
+  .search-bar {
+    transition: all 0.3s ease;
+  }
+  .search-bar:focus-within {
+    box-shadow: 0 0 0 2px rgba(192,132,252,0.2), 0 4px 20px rgba(192,132,252,0.1);
+  }
+
+  /* Плавная анимация для навигации */
+  nav a {
+    position: relative;
+    overflow: hidden;
+  }
+  nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    width: 0; height: 2px;
+    background: var(--accent);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(-50%);
+    border-radius: 1px;
+  }
+  nav a:hover::after, nav a.active::after {
+    width: 60%;
+  }
+
+  /* Светящийся footer */
+  footer {
+    position: relative;
+  }
+  footer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--pink), transparent);
+    opacity: 0.3;
+  }
+
+  /* Улучшенный empty state */
+  .empty-state.show {
+    animation: emptyPulse 3s ease-in-out infinite;
+  }
+  @keyframes emptyPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  /* Светящийся эффект для тегов */
+  .tag-game {
+    transition: all 0.25s ease;
+  }
+  .tag-game:hover {
+    box-shadow: 0 0 8px rgba(192,132,252,0.3);
+    transform: translateY(-1px);
+  }
+
+  /* Плавное появление чата */
+  #chatPanel {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Светящийся play button */
+  .hero-latest-play, .thumb-icon {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .hero-latest-card:hover .hero-latest-play {
+    box-shadow: 0 0 20px rgba(192,132,252,0.4);
+  }
+
+  /* Улучшенный load more button */
+  #loadMoreBtn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  #loadMoreBtn::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--pink));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    filter: blur(8px);
+    z-index: -1;
+  }
+  #loadMoreBtn:hover::before {
+    opacity: 0.4;
+  }
+  #loadMoreBtn:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Улучшенный admin badge */
+  .admin-badge {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .admin-badge:hover {
+    box-shadow: 0 0 15px rgba(192,132,252,0.2);
+  }
+
+  /* Светящийся логотип */
+  .logo-mark {
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  .logo-mark::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--pink));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    filter: blur(6px);
+    z-index: -1;
+  }
+  .logo:hover .logo-mark::after {
+    opacity: 0.5;
+  }
+  .logo:hover .logo-mark {
+    transform: scale(1.05);
+  }
+
+  /* Плавный hover для about cards */
+  .about-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .about-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  }
+  .about-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(192,132,252,0.03), transparent);
+    transition: left 0.6s ease;
+  }
+  .about-card:hover::before {
+    left: 100%;
+  }
+
+  /* Светящийся about-link-btn */
+  .about-link-btn {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .about-link-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(192,132,252,0.1);
+    border-color: rgba(192,132,252,0.3);
+  }
+
+  /* Улучшенный support button */
+  .support-btn {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .support-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(212,83,126,0.3);
+  }
+
+  /* Плавное появление сообщений чата */
+  #chatMessages > div {
+    animation: chatMsgIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+  @keyframes chatMsgIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Светящийся эффект для section-header */
+  .section-header {
+    position: relative;
+  }
+  .section-header::after {
+    content: '';
+    position: absolute;
+    bottom: -8px; left: 0;
+    width: 40px; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--pink));
+    border-radius: 1px;
+    opacity: 0.6;
+  }
+
+  /* Улучшенный select */
+  .sort-select {
+    transition: all 0.3s ease;
+  }
+  .sort-select:focus {
+    box-shadow: 0 0 0 2px rgba(192,132,252,0.2);
+  }
+
+  /* Плавный hover для chips */
+  .chip {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(192,132,252,0.08);
+  }
+  .chip.active {
+    box-shadow: 0 0 12px rgba(192,132,252,0.15);
+  }
+
+  /* Мерцающие звезды на фоне */
+  .stars {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: 
+      radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 40px 70px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 50px 160px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 160px 120px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 200px 50px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 230px 180px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 280px 90px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 320px 150px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 360px 60px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 400px 200px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 450px 100px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 500px 170px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 550px 40px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 600px 130px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 650px 80px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 700px 190px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 750px 50px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 800px 140px, rgba(255,255,255,0.1), transparent);
+    animation: twinkle 4s ease-in-out infinite alternate;
+  }
+  @keyframes twinkle {
+    0% { opacity: 0.3; }
+    100% { opacity: 0.8; }
+  }
+
+  /* Плавная анимация для счетчиков */
+  .stat-num {
+    transition: all 0.3s ease;
+  }
+
+  /* Улучшенный player modal */
+  #playerContainer {
+    box-shadow: 0 0 60px rgba(0,0,0,0.5), 0 0 100px rgba(192,132,252,0.03);
+  }
+
+  /* Светящийся close button */
+  .modal-close, .support-modal-close {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .modal-close:hover, .support-modal-close:hover {
+    transform: rotate(90deg);
+    box-shadow: 0 0 15px rgba(244,114,182,0.3);
+  }
+
+  /* Плавный hover для icon-btn */
+  .icon-btn {
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .icon-btn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(192,132,252,0.15);
+  }
+
+  /* Светящийся эффект для form-submit */
+  .form-submit {
+    position: relative;
+    overflow: hidden;
+  }
+  .form-submit::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .form-submit:hover::after {
+    opacity: 1;
+  }
+  .form-submit:hover {
+    box-shadow: 0 8px 30px rgba(124,58,237,0.3);
+  }
+
+  /* Улучшенный auth button */
+  .auth-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .auth-btn:first-of-type:hover {
+    box-shadow: 0 8px 25px rgba(124,58,237,0.25);
+  }
+
+  /* Плавный hover для footer links */
+  footer a {
+    transition: all 0.25s ease;
+    position: relative;
+  }
+  footer a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0;
+    width: 0; height: 1px;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+  footer a:hover::after {
+    width: 100%;
+  }
+
+  /* Улучшенный about-avatar */
+  .about-avatar {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .about-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(192,132,252,0.2);
+  }
+
+  /* Светящийся эффект для about-specs */
+  .about-specs {
+    position: relative;
+    overflow: hidden;
+  }
+  .about-specs::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(192,132,252,0.02), transparent);
+    transition: left 1s ease;
+  }
+  .about-specs:hover::before {
+    left: 100%;
+  }
+
+  /* Плавный hover для support-method */
+  .support-method {
+    transition: all 0.3s ease;
+  }
+  .support-method:hover {
+    border-color: rgba(255,255,255,0.15);
+    transform: translateY(-1px);
+  }
+
+  /* Светящийся copy button */
+  .support-copy-btn {
+    transition: all 0.25s ease;
+  }
+  .support-copy-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 10px rgba(192,132,252,0.15);
+  }
+
+  /* Плавный hover для support-da-btn */
+  .support-da-btn {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .support-da-btn::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #7c3aed, #db2777);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    filter: blur(8px);
+    z-index: -1;
+  }
+  .support-da-btn:hover::before {
+    opacity: 0.4;
+  }
+  .support-da-btn:hover {
+    transform: translateY(-2px);
+    border-color: rgba(192,132,252,0.3);
+  }
+
+  /* Улучшенный noise overlay */
+  body::before {
+    opacity: 0.4;
+    animation: noise 8s steps(10) infinite;
+  }
+  @keyframes noise {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-2%, -2%); }
+    20% { transform: translate(2%, 2%); }
+    30% { transform: translate(-1%, 1%); }
+    40% { transform: translate(1%, -1%); }
+    50% { transform: translate(-2%, 2%); }
+    60% { transform: translate(2%, -2%); }
+    70% { transform: translate(-1%, -1%); }
+    80% { transform: translate(1%, 1%); }
+    90% { transform: translate(-2%, -1%); }
+  }
+
+  /* Улучшенный responsive */
+  @media (max-width: 768px) {
+    .orb { display: none; }
+    .stars { display: none; }
+    .vod-card::before { display: none; }
+  }
 
 </style>
 </head>
 <body>
 
+<div class="stars"></div>
+
 <div class="orb orb-1"></div>
 <div class="orb orb-2"></div>
 <div class="orb orb-3"></div>
+<div class="orb orb-4"></div>
 
 <!-- HEADER -->
 <header>
@@ -1766,10 +2435,10 @@ iframe {
     </nav>
 
       <div class="header-right">
-        <div class="search-bar">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="text" id="searchInput" placeholder="search vods…" oninput="filterCards()">
-        </div>
+        <div class="search-bar" onclick="this.classList.toggle('expanded');this.querySelector('input').focus()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="search vods…" oninput="filterCards()">
+      </div>
         <button class="upload-btn" id="uploadBtn" onclick="openModal()" style="display:none">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           upload recording
@@ -1785,101 +2454,19 @@ iframe {
       </div>
   </div>
 </header>
-<!-- LEFT SIDEBAR -->
-<div class="left-sidebar-fixed">
-  
-  <!-- Nav label -->
-  <div style="padding:0 20px 16px;font-family:'DM Mono',monospace;font-size:10px;color:#5e5c72;text-transform:uppercase;letter-spacing:0.12em;display:flex;align-items:center;gap:6px;">
-    <span style="width:5px;height:5px;border-radius:50%;background:#c084fc;display:inline-block;"></span>
-    stream archive
-  </div>
-
-  <!-- Nav items -->
-  <nav style="display:flex;flex-direction:column;gap:2px;padding:0 12px;">
-    <a href="#vods" onclick="document.querySelector('#vods').scrollIntoView({behavior:'smooth'})" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none;background:rgba(192,132,252,0.1);border:1px solid rgba(192,132,252,0.2);color:#c084fc;font-size:13px;font-weight:500;font-family:'Outfit',sans-serif;">
-      <span style="font-family:'DM Mono',monospace;font-size:11px;color:#5e5c72;">01</span> VODS
-    </a>
-    <a href="#about" onclick="document.querySelector('#about').scrollIntoView({behavior:'smooth'})" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none;color:#5e5c72;font-size:13px;font-family:'Outfit',sans-serif;transition:color 0.2s;" onmouseover="this.style.color='#9c98b4'" onmouseout="this.style.color='#5e5c72'">
-      <span style="font-family:'DM Mono',monospace;font-size:11px;">02</span> ABOUT STREAMER
-    </a>
-  </nav>
-
-  <!-- Divider -->
-  <div style="height:1px;background:rgba(255,255,255,0.07);margin:20px 12px;"></div>
-
-  <!-- Now Playing -->
-  <div style="padding:0 16px;">
-    <div style="font-family:'DM Mono',monospace;font-size:10px;color:#5e5c72;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">now playing</div>
-
-    <div onclick="toggleMusic()" style="cursor:pointer;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px;">
-      <div style="display:flex;align-items:flex-end;gap:2px;height:32px;margin-bottom:10px;">
-        <div style="width:3px;background:#c084fc;border-radius:2px;animation:wave 1.2s ease-in-out infinite;"></div>
-        <div style="width:3px;background:#c084fc;border-radius:2px;animation:wave 1.2s ease-in-out infinite 0.2s;"></div>
-        <div style="width:3px;background:#e879f9;border-radius:2px;animation:wave 1.2s ease-in-out infinite 0.4s;"></div>
-        <div style="width:3px;background:#c084fc;border-radius:2px;animation:wave 1.2s ease-in-out infinite 0.6s;"></div>
-      </div>
-
-      <div style="font-size:12px;color:#9c98b4;font-weight:500;margin-bottom:2px;">Crystal Castles — Not In Love</div>
-      <div id="musicState" style="font-family:'DM Mono',monospace;font-size:10px;color:#5e5c72;">click to play</div>
-    </div>
-
-    <audio id="bgMusic" loop>
-      <source src="https://files.catbox.moe/6r9q6m.mp3" type="audio/mpeg">
-    </audio>
-  </div>
-
-  <!-- Divider -->
-  <div style="height:1px;background:rgba(255,255,255,0.07);margin:20px 12px;"></div>
-
-  <!-- Stream Stats -->
-  <div style="padding:0 16px;">
-    <div style="font-family:'DM Mono',monospace;font-size:10px;color:#5e5c72;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">stream stats</div>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:11px;color:#5e5c72;text-transform:uppercase;letter-spacing:0.06em;font-family:'DM Mono',monospace;">total streams</span>
-        <span style="font-size:12px;color:#f0eef8;font-weight:500;" id="sideStatStreams">—</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:11px;color:#5e5c72;text-transform:uppercase;letter-spacing:0.06em;font-family:'DM Mono',monospace;">total views</span>
-        <span style="font-size:12px;color:#f0eef8;font-weight:500;" id="sideStatViews">—</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:11px;color:#5e5c72;text-transform:uppercase;letter-spacing:0.06em;font-family:'DM Mono',monospace;">followers</span>
-        <span style="font-size:12px;color:#f0eef8;font-weight:500;" id="sideStatFollowers">—</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:11px;color:#5e5c72;text-transform:uppercase;letter-spacing:0.06em;font-family:'DM Mono',monospace;">stream time</span>
-        <span style="font-size:12px;color:#f0eef8;font-weight:500;">—</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Divider -->
-  <div style="height:1px;background:rgba(255,255,255,0.07);margin:20px 12px;"></div>
-
-  <!-- System Status -->
-  <div style="padding:0 16px;">
-    <div style="font-family:'DM Mono',monospace;font-size:10px;color:#5e5c72;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">system status</div>
-    <div style="display:flex;align-items:center;gap:6px;">
-      <span style="width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px #4ade80;display:inline-block;"></span>
-      <span style="font-size:11px;color:#4ade80;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.06em;">all systems operational</span>
-    </div>
-  </div>
-
-</div>
 
 <!-- HERO -->
-<section class="hero" id="vods">
+<section class="hero">
   <div class="hero-layout">
   <div class="hero-profile" style="margin-bottom:0;display:flex;flex-direction:column;">
-    <div style="display:flex;align-items:center;gap:24px;">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;min-width:0;overflow:visible;width:100%;">
     <div class="avatar-ring" style="flex-shrink:0;">
       <div class="avatar">
         <img src="data:image/jpeg;base64,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" alt="cutierover" id="avatarImg" style="display:block">
         <span id="avatarFallback" style="display:none">✦</span>
       </div>
     </div>
-    <div class="hero-info">
+    <div class="hero-info" style="min-width:0;overflow:hidden;">
       <div class="streamer-tag">stream archive</div>
       <h1>cutie<em>rover</em></h1>
       <p class="hero-desc">Все записи стримов в одном месте. Смотри то, что пропустил, в лучшем качестве.</p>
@@ -1930,8 +2517,8 @@ iframe {
     <div class="hero-stats-grid">
       <div class="hero-stat-box" id="twitchStatusBox" style="cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;" onclick="window.open('https://twitch.tv/cutierover','_blank')">
         <div style="display:flex;align-items:center;gap:8px;">
-          <span id="liveIndicator" style="width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0;display:block"></span>
-          <div class="stat-label" style="margin:0" id="liveLabel">checking…</div>
+          <span id="liveIndicator" style="width:8px;height:8px;border-radius:50%;background:#f87171;box-shadow:0 0 6px #f87171;flex-shrink:0;display:block"></span>
+          <div class="stat-label" style="margin:0" id="liveLabel">offline</div>
         </div>
         <div>
           <div class="stat-num" id="statFollowers">—</div>
@@ -2086,95 +2673,6 @@ iframe {
   <span>© 2025 cutierover - stream archive</span>
   <span>built by <a href="https://twitch.tv/voicecoretm">voicecoretm</a> and <a href="https://twitch.tv/ra9dinss">ra9dinss</a></span>
   <a href="https://twitch.tv/cutierover" target="_blank">Twitch ↗</a>
-<!-- RIGHT SIDEBAR -->
-<div style="position:fixed;right:0;top:64px;width:220px;height: 100%;min-height: calc(100vh - 64px);background:rgba(10,10,15,0.85);border-left:1px solid rgba(255,255,255,0.07);backdrop-filter:blur(12px);z-index:9;display:flex;flex-direction:column;padding:24px 0;overflow-y:auto;">
-  
-  <div style="padding:0 20px 16px;font-family:'DM Mono',monospace;font-size:10px;color:#5e5c72;text-transform:uppercase;letter-spacing:0.12em;display:flex;align-items:center;justify-content:space-between;">
-    <span style="display:flex;align-items:center;gap:6px;">
-      <span style="width:5px;height:5px;border-radius:50%;background:#4ade80;box-shadow:0 0 4px #4ade80;display:inline-block;animation:blink 1.2s infinite;"></span>
-      live activity
-    </span>
-    <span style="color:#5e5c72;" id="sideViewerCount">—</span>
-  </div>
-
-  <!-- Recent Donations -->
-  <div style="padding:0 16px;">
-    <div style="font-family:'DM Mono',monospace;font-size:10px;color:#5e5c72;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">recent donations</div>
-    <div style="display:flex;flex-direction:column;gap:8px;" id="sideDonations">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#db2777);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">♛</span>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:11px;color:#f0eef8;font-weight:500;">muhabolcka</div>
-          <div style="font-size:10px;color:#c084fc;font-family:'DM Mono',monospace;">600 RUB</div>
-        </div>
-        <span style="font-size:10px;color:#5e5c72;font-family:'DM Mono',monospace;white-space:nowrap;">2m ago</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#db2777);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">♛</span>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:11px;color:#f0eef8;font-weight:500;">river722</div>
-          <div style="font-size:10px;color:#c084fc;font-family:'DM Mono',monospace;">1 836 RUB</div>
-        </div>
-        <span style="font-size:10px;color:#5e5c72;font-family:'DM Mono',monospace;white-space:nowrap;">5m ago</span>
-      </div>
-    </div>
-  </div>
-
-  <div style="height:1px;background:rgba(255,255,255,0.07);margin:16px 12px;"></div>
-
-  <!-- Latest Followers -->
-  <div style="padding:0 16px;">
-    <div style="font-family:'DM Mono',monospace;font-size:10px;color:#5e5c72;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">latest followers</div>
-    <div style="display:flex;flex-direction:column;gap:7px;">
-      <div style="display:flex;align-items:center;gap:7px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5e5c72" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        <div style="flex:1;"><div style="font-size:11px;color:#9c98b4;">darkness_07</div><div style="font-size:10px;color:#5e5c72;font-family:'DM Mono',monospace;">just followed</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:7px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5e5c72" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        <div style="flex:1;"><div style="font-size:11px;color:#9c98b4;">neon_official</div><div style="font-size:10px;color:#5e5c72;font-family:'DM Mono',monospace;">just followed</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:7px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5e5c72" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        <div style="flex:1;"><div style="font-size:11px;color:#9c98b4;">pulse_1</div><div style="font-size:10px;color:#5e5c72;font-family:'DM Mono',monospace;">just followed</div></div>
-      </div>
-    </div>
-  </div>
-
-  <div style="height:1px;background:rgba(255,255,255,0.07);margin:16px 12px;"></div>
-
-  <!-- Stream Schedule -->
-  <div style="padding:0 16px;">
-    <div style="font-family:'DM Mono',monospace;font-size:10px;color:#5e5c72;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">stream schedule</div>
-    <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
-      <div>
-        <div style="font-size:10px;color:#5e5c72;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.06em;">next stream</div>
-        <div style="font-size:12px;color:#f0eef8;font-weight:500;margin-top:2px;">Tomorrow</div>
-        <div style="font-size:11px;color:#9c98b4;font-family:'DM Mono',monospace;">20:00 GMT+3</div>
-      </div>
-    </div>
-    <a href="https://twitch.tv/cutierover" target="_blank" style="display:block;text-align:center;margin-top:8px;font-size:11px;color:#5e5c72;font-family:'DM Mono',monospace;text-decoration:none;" onmouseover="this.style.color='#9c98b4'" onmouseout="this.style.color='#5e5c72'">see full schedule</a>
-  </div>
-
-  <div style="height:1px;background:rgba(255,255,255,0.07);margin:16px 12px;"></div>
-
-  <!-- Stay Connected -->
-  <div style="padding:0 16px;">
-    <div style="font-family:'DM Mono',monospace;font-size:10px;color:#5e5c72;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">stay connected</div>
-    <div style="display:flex;gap:8px;">
-      <a href="https://t.me/cutievods" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px;background:rgba(0,136,204,0.1);border:1px solid rgba(0,136,204,0.2);border-radius:8px;text-decoration:none;color:#60b8e0;font-size:11px;font-weight:500;" onmouseover="this.style.background='rgba(0,136,204,0.2)'" onmouseout="this.style.background='rgba(0,136,204,0.1)'">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.942z"/></svg>
-        telegram
-      </a>
-      <a href="https://twitch.tv/cutierover" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px;background:rgba(145,71,255,0.1);border:1px solid rgba(145,71,255,0.2);border-radius:8px;text-decoration:none;color:#bf94ff;font-size:11px;font-weight:500;" onmouseover="this.style.background='rgba(145,71,255,0.2)'" onmouseout="this.style.background='rgba(145,71,255,0.1)'">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
-        twitch
-      </a>
-    </div>
-  </div>
-
-</div>
 </footer>
 
 <!-- VIDEO PLAYER MODAL -->
@@ -2434,6 +2932,9 @@ function makeCard(vod, idx) {
           <button class="icon-btn" title="open" onclick="event.stopPropagation();openVod('${vod.id}')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </button>
+          <button class="icon-btn" title="edit" onclick="event.stopPropagation();editVod('${vod.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
           <button class="icon-btn" title="delete" onclick="event.stopPropagation();deleteVod('${vod.id}')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
           </button>
@@ -2572,14 +3073,13 @@ function filterCards() {
 // ─── MODAL ────────────────────────────────────────────────
 function openModal() {
   document.getElementById('modalOverlay').classList.add('open');
-  // Set today's date
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('vodDate').value = today;
 }
 
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
-  resetModal();
+  setTimeout(resetModal, 350);
 }
 
 function handleOverlayClick(e) {
@@ -2599,6 +3099,10 @@ function resetModal() {
   document.getElementById('vodDurM').value = '';
   document.getElementById('vodDurS').value = '';
   selectedFile = null;
+  document.querySelector('#modalOverlay .modal-title').textContent = 'upload recording';
+  document.querySelector('#modalOverlay .form-submit').textContent = 'publish recording';
+  document.querySelector('#modalOverlay .form-submit').onclick = submitVod;
+  window._editingVodId = null;
 }
 
 // ─── FILE HANDLING ─────────────────────────────────────────
@@ -2811,19 +3315,83 @@ function escHtml(s) {
 
 function closePlayer() {
   document.getElementById('playerOverlay').classList.remove('open');
-  document.getElementById('videoPlayer').pause && document.getElementById('videoPlayer').pause();
-  document.getElementById('videoPlayer').src = '';
-  document.getElementById('iframePlayer').src = '';
-  // Reset chat
-  const chatPanel = document.getElementById('chatPanel');
-  chatPanel.style.display = 'none';
-  document.getElementById('chatMessages').innerHTML = '';
-  if (window._chatInterval) { clearInterval(window._chatInterval); window._chatInterval = null; }
+  setTimeout(() => {
+    document.getElementById('videoPlayer').pause && document.getElementById('videoPlayer').pause();
+    document.getElementById('videoPlayer').src = '';
+    document.getElementById('iframePlayer').src = '';
+    const chatPanel = document.getElementById('chatPanel');
+    chatPanel.style.display = 'none';
+    document.getElementById('chatMessages').innerHTML = '';
+    if (window._chatInterval) { clearInterval(window._chatInterval); window._chatInterval = null; }
+    window._chatData = null;
+  }, 350);
+}
   window._chatData = null;
 }
 
 function handlePlayerOverlayClick(e) {
   if (e.target === document.getElementById('playerOverlay')) closePlayer();
+}
+
+function editVod(id) {
+  const vod = vods.find(v => String(v.id) === String(id));
+  if (!vod) return;
+  window._editingVodId = id;
+
+  const dur = vod.duration || 0;
+  document.getElementById('vodDurH').value = Math.floor(dur / 3600);
+  document.getElementById('vodDurM').value = Math.floor((dur % 3600) / 60);
+  document.getElementById('vodDurS').value = dur % 60;
+  document.getElementById('vodTitle').value = vod.title || '';
+  document.getElementById('vodDate').value = vod.date || '';
+  document.getElementById('vodCategory').value = vod.category || 'gaming';
+  document.getElementById('vodTags').value = vod.tags || '';
+  document.getElementById('vodUrl').value = vod.url || '';
+  document.getElementById('vodChat').value = vod.chat_url || '';
+  document.getElementById('vodThumbnail').value = vod.thumbnail || '';
+
+  document.querySelector('#modalOverlay .modal-title').textContent = 'edit recording';
+  document.querySelector('#modalOverlay .form-submit').textContent = 'save changes';
+  document.querySelector('#modalOverlay .form-submit').onclick = saveEditVod;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+async function saveEditVod() {
+  const id = window._editingVodId;
+  if (!id) return;
+  const title = document.getElementById('vodTitle').value.trim();
+  if (!title) { document.getElementById('vodTitle').focus(); return; }
+
+  const updated = {
+    title,
+    date: document.getElementById('vodDate').value,
+    category: document.getElementById('vodCategory').value,
+    tags: document.getElementById('vodTags').value,
+    duration: ((parseInt(document.getElementById('vodDurH').value)||0) * 3600) + ((parseInt(document.getElementById('vodDurM').value)||0) * 60) + (parseInt(document.getElementById('vodDurS').value)||0),
+    url: document.getElementById('vodUrl').value.trim(),
+    thumbnail: document.getElementById('vodThumbnail').value.trim(),
+    chat_url: document.getElementById('vodChat').value.trim() || null
+  };
+
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/vods?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + supabaseSession.access_token,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(updated)
+    });
+    const idx = vods.findIndex(v => String(v.id) === String(id));
+    if (idx !== -1) vods[idx] = { ...vods[idx], ...updated };
+    window._editingVodId = null;
+    closeModal();
+    renderGrid();
+  } catch(e) {
+    alert('Ошибка сохранения: ' + e.message);
+  }
 }
 
 async function deleteVod(id) {
@@ -2888,12 +3456,25 @@ function setAdminMode(admin) {
   renderGrid();
 }
 
-function openAuthModal() {
-  document.getElementById('authError').textContent = '';
-  document.getElementById('authEmail').value = '';
-  document.getElementById('authPassword').value = '';
-  document.getElementById('authOverlay').classList.add('open');
-  setTimeout(() => document.getElementById('authEmail').focus(), 50);
+() {
+  document.getElementById('authOverlay').classList.remove('open');
+}
+
+function closePlayer() {
+  document.getElementById('playerOverlay').classList.remove('open');
+  setTimeout(() => {
+    document.getElementById('videoPlayer').pause && document.getElementById('videoPlayer').pause();
+    document.getElementById('videoPlayer').src = '';
+    document.getElementById('iframePlayer').src = '';
+    const chatPanel = document.getElementById('chatPanel');
+    chatPanel.style.display = 'none';
+    document.getElementById('chatMessages').innerHTML = '';
+    if (window._chatInterval) { clearInterval(window._chatInterval); window._chatInterval = null; }
+    window._chatData = null;
+  }, 350);
+}
+    window._chatData = null;
+  }, 350);
 }
 
 function closeAuthModal() {
@@ -2935,50 +3516,74 @@ async function logoutAdmin() {
 async function fetchTwitchData() {
   try {
     // Используем ivr.fi — публичный unofficial Twitch API proxy
-    const [userRes, streamRes] = await Promise.all([
-      fetch('https://api.ivr.fi/v2/twitch/user?login=cutierover'),
-      fetch('https://api.ivr.fi/v2/twitch/channel?login=cutierover')
-    ]);
+const [userRes] = await Promise.all([
+  fetch('https://api.ivr.fi/v2/twitch/user?login=cutierover')
+]);
 
-    if (userRes.ok) {
-      const users = await userRes.json();
-      const user = Array.isArray(users) ? users[0] : users;
-      if (user && user.followers !== undefined) {
-        const f = user.followers;
-        document.getElementById('statFollowers').textContent =
-          f >= 1000 ? (f / 1000).toFixed(1) + 'k' : f;
-	const sideEl = document.getElementById('sideStatFollowers');
-        if (sideEl) sideEl.textContent = f >= 1000 ? (f / 1000).toFixed(1) + 'k' : f;
-      }
-    }
-
-    if (streamRes.ok) {
-      const channels = await streamRes.json();
-      const ch = Array.isArray(channels) ? channels[0] : channels;
-      const isLive = ch && ch.stream !== null && ch.stream !== undefined;
-      const dot = document.getElementById('liveIndicator');
-      const label = document.getElementById('liveLabel');
-      const viewersEl = document.getElementById('statViewers');
-      if (isLive) {
-        dot.style.background = 'var(--live)';
-        dot.style.boxShadow = '0 0 6px var(--live)';
-        dot.style.animation = 'blink 1.2s infinite';
-        label.textContent = 'live now';
-        label.style.color = 'var(--live)';
-        const v = ch.stream.viewers;
-        if (viewersEl) viewersEl.textContent = v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v;
-      } else {
-        dot.style.background = 'var(--text3)';
-        label.textContent = 'offline';
-        label.style.color = 'var(--text3)';
-        if (viewersEl) viewersEl.textContent = '—';
-      }
-    }
-  } catch(e) {
-    document.getElementById('liveLabel').textContent = 'twitch';
-    document.getElementById('statFollowers').textContent = '220k+';
+if (userRes.ok) {
+  const users = await userRes.json();
+  const user = Array.isArray(users) ? users[0] : users;
+  if (user && user.followers !== undefined) {
+    const f = user.followers;
+    document.getElementById('statFollowers').textContent =
+      f >= 1000 ? (f / 1000).toFixed(1) + 'k' : f;
   }
 }
+
+const streamRes = await fetch('https://decapi.me/twitch/uptime/cutierover');
+const streamText = await streamRes.text();
+const isLive = !streamText.includes('offline') && !streamText.includes('error');
+
+const dot = document.getElementById('liveIndicator');
+const label = document.getElementById('liveLabel');
+const viewersEl = document.getElementById('statViewers');
+
+if (isLive) {
+  dot.style.background = 'var(--live)';
+  dot.style.boxShadow = '0 0 6px var(--live)';
+  dot.style.animation = 'blink 1.2s infinite';
+  label.textContent = 'live now';
+  label.style.color = 'var(--live)';
+  try {
+    const viewersRes = await fetch('https://decapi.me/twitch/viewercount/cutierover');
+    const viewersText = await viewersRes.text();
+    const v = parseInt(viewersText.trim());
+    if (viewersEl && !isNaN(v)) {
+      viewersEl.textContent = v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v;
+    }
+  } catch(e) {
+    if (viewersEl) viewersEl.textContent = '—';
+  }
+} else {
+  dot.style.background = '#f87171';
+  dot.style.boxShadow = '0 0 6px #f87171';
+  dot.style.animation = 'none';
+  label.textContent = 'offline';
+  label.style.color = '#f87171';
+  if (viewersEl) viewersEl.textContent = '—';
+}
+} catch(e) {
+    const dot = document.getElementById('liveIndicator');
+    dot.style.background = '#f87171';
+    dot.style.boxShadow = '0 0 6px #f87171';
+    dot.style.animation = 'none';
+    document.getElementById('liveLabel').textContent = 'offline';
+    document.getElementById('liveLabel').style.color = '#f87171';
+    document.getElementById('statFollowers').textContent = '220k+';
+}
+}
+
+
+// Плавный скролл для якорных ссылок
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
 
 async function init() {
   // Показываем загрузку
@@ -3025,47 +3630,5 @@ init();
     </div>
   </div>
 </div>
-
-<script>
-window.addEventListener('scroll', () => {
-  document.body.style.setProperty('--scrollY', window.scrollY + 'px');
-});
-</script>
-
-<script>
-
-async function loadFollowers() {
-  const followers = ['darkness_07','neon_official','pdse_1','cute_bunny'];
-
-  const followersContainer = document.querySelector('#latestFollowers');
-  if(!followersContainer) return;
-
-  followersContainer.innerHTML = followers.map(f => `
-    <div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-      <div style="color:#f0eef8;font-size:12px;">${f}</div>
-      <div style="color:#5e5c72;font-size:10px;font-family:'DM Mono',monospace;">just followed</div>
-    </div>
-  `).join('');
-}
-
-function toggleMusic() {
-  const audio = document.getElementById('bgMusic');
-  const state = document.getElementById('musicState');
-
-  if(audio.paused) {
-    audio.play();
-    state.textContent = 'playing...';
-  } else {
-    audio.pause();
-    state.textContent = 'paused';
-  }
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  loadFollowers();
-});
-</script>
-
 </body>
-
 </html>
