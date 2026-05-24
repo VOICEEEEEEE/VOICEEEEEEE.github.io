@@ -1631,9 +1631,8 @@
 }
 .support-copy-btn:hover { background: rgba(255,255,255,0.07); }
 
-  /* === ПЛАВНЫЕ АНИМАЦИИ === */
+  /* === ПЛАВНЫЕ АНИМАЦИИ МОДАЛЬНЫХ ОКОН === */
 
-  /* Плавное появление модальных окон */
   .modal-overlay {
     opacity: 0;
     transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1707,7 +1706,6 @@
 
   /* === УЛУЧШЕННЫЕ СВЕЧЕНИЯ === */
 
-  /* Обновленные градиентные шары с анимацией */
   .orb {
     transition: all 0.8s ease;
     filter: blur(100px);
@@ -1732,7 +1730,6 @@
     opacity: 0.15;
     animation: orbFloat3 18s ease-in-out infinite;
   }
-  /* Новый шар */
   .orb-4 {
     position: fixed;
     border-radius: 50%;
@@ -1765,7 +1762,7 @@
     50% { transform: translate(-40px, -30px) scale(1.2); }
   }
 
-  /* Светящиеся границы для карточек при hover */
+  /* Светящиеся границы карточек при hover */
   .vod-card::before {
     content: '';
     position: absolute;
@@ -3073,13 +3070,14 @@ function filterCards() {
 // ─── MODAL ────────────────────────────────────────────────
 function openModal() {
   document.getElementById('modalOverlay').classList.add('open');
+  // Set today's date
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('vodDate').value = today;
 }
 
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
-  setTimeout(resetModal, 350);
+  resetModal();
 }
 
 function handleOverlayClick(e) {
@@ -3315,17 +3313,14 @@ function escHtml(s) {
 
 function closePlayer() {
   document.getElementById('playerOverlay').classList.remove('open');
-  setTimeout(() => {
-    document.getElementById('videoPlayer').pause && document.getElementById('videoPlayer').pause();
-    document.getElementById('videoPlayer').src = '';
-    document.getElementById('iframePlayer').src = '';
-    const chatPanel = document.getElementById('chatPanel');
-    chatPanel.style.display = 'none';
-    document.getElementById('chatMessages').innerHTML = '';
-    if (window._chatInterval) { clearInterval(window._chatInterval); window._chatInterval = null; }
-    window._chatData = null;
-  }, 350);
-}
+  document.getElementById('videoPlayer').pause && document.getElementById('videoPlayer').pause();
+  document.getElementById('videoPlayer').src = '';
+  document.getElementById('iframePlayer').src = '';
+  // Reset chat
+  const chatPanel = document.getElementById('chatPanel');
+  chatPanel.style.display = 'none';
+  document.getElementById('chatMessages').innerHTML = '';
+  if (window._chatInterval) { clearInterval(window._chatInterval); window._chatInterval = null; }
   window._chatData = null;
 }
 
@@ -3456,25 +3451,12 @@ function setAdminMode(admin) {
   renderGrid();
 }
 
-() {
-  document.getElementById('authOverlay').classList.remove('open');
-}
-
-function closePlayer() {
-  document.getElementById('playerOverlay').classList.remove('open');
-  setTimeout(() => {
-    document.getElementById('videoPlayer').pause && document.getElementById('videoPlayer').pause();
-    document.getElementById('videoPlayer').src = '';
-    document.getElementById('iframePlayer').src = '';
-    const chatPanel = document.getElementById('chatPanel');
-    chatPanel.style.display = 'none';
-    document.getElementById('chatMessages').innerHTML = '';
-    if (window._chatInterval) { clearInterval(window._chatInterval); window._chatInterval = null; }
-    window._chatData = null;
-  }, 350);
-}
-    window._chatData = null;
-  }, 350);
+function openAuthModal() {
+  document.getElementById('authError').textContent = '';
+  document.getElementById('authEmail').value = '';
+  document.getElementById('authPassword').value = '';
+  document.getElementById('authOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('authEmail').focus(), 50);
 }
 
 function closeAuthModal() {
@@ -3573,18 +3555,6 @@ if (isLive) {
 }
 }
 
-
-// Плавный скролл для якорных ссылок
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', function(e) {
-    e.preventDefault();
-    const target = document.querySelector(this.getAttribute('href'));
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  });
-});
-
 async function init() {
   // Показываем загрузку
   const grid = document.getElementById('videoGrid');
@@ -3605,6 +3575,42 @@ async function init() {
 }
 
 init();
+
+
+// === ПЛАВНЫЕ АНИМАЦИИ (добавлено поверх существующего кода) ===
+
+// Переопределяем closeModal для плавного закрытия
+const _originalCloseModal = closeModal;
+closeModal = function() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  setTimeout(_originalCloseModal, 350);
+};
+
+// Переопределяем closeAuthModal для плавного закрытия  
+const _originalCloseAuthModal = closeAuthModal;
+closeAuthModal = function() {
+  document.getElementById('authOverlay').classList.remove('open');
+  setTimeout(_originalCloseAuthModal, 350);
+};
+
+// Переопределяем closePlayer для плавного закрытия
+const _originalClosePlayer = closePlayer;
+closePlayer = function() {
+  document.getElementById('playerOverlay').classList.remove('open');
+  setTimeout(_originalClosePlayer, 350);
+};
+
+// Плавный скролл для якорных ссылок
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
 </script>
 <!-- Модальное окно поддержки -->
 <div class="support-overlay" id="supportOverlay" onclick="if(event.target===this)this.classList.remove('open')">
