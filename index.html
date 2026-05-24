@@ -1830,7 +1830,8 @@
   .hero-latest-card:hover::after {
     opacity: 0.4;
   }
-  
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
   }
 
@@ -2441,24 +2442,13 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 /* ═══ ИНТЕРАКТИВНЫЕ ЧАСТИЦЫ ═══ */
 #particleCanvas {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 /* ═══ /ИНТЕРАКТИВНЫЕ ЧАСТИЦЫ ═══ */
 
@@ -2466,11 +2456,7 @@
 <base target="_blank">
 </head>
 <body>
-<canvas id="particleCanvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.7;"></canvas>
-
-
-
-
+<canvas id="particleCanvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.6;"></canvas>
 
 
 <div class="stars"></div>
@@ -3880,23 +3866,7 @@ setTimeout(() => {
 </script>
 
 
-
-
-
-
-
-
-
-
-
-
-
-<!-- ═══ ИНТЕРАКТИВНЫЕ ЧАСТИЦЫ ═══ -->
-
-
-
 <script>
-// ═══ ИНТЕРАКТИВНЫЕ ЧАСТИЦЫ ═══
 (function(){
   var canvas = document.getElementById('particleCanvas');
   if (!canvas) return;
@@ -3956,7 +3926,7 @@ setTimeout(() => {
     ctx.fill();
   };
 
-  var particleCount = Math.min(80, Math.floor((canvas.width * canvas.height) / 15000));
+  var particleCount = Math.min(60, Math.floor((canvas.width * canvas.height) / 20000));
   for (var i = 0; i < particleCount; i++) {
     particles.push(new Particle());
   }
@@ -3967,9 +3937,9 @@ setTimeout(() => {
         var dx = particles[a].x - particles[b].x;
         var dy = particles[a].y - particles[b].y;
         var distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 120) {
+        if (distance < 100) {
           ctx.beginPath();
-          ctx.strokeStyle = 'rgba(192,132,252,' + (0.1 * (1 - distance / 120)) + ')';
+          ctx.strokeStyle = 'rgba(192,132,252,' + (0.08 * (1 - distance / 100)) + ')';
           ctx.lineWidth = 0.5;
           ctx.moveTo(particles[a].x, particles[a].y);
           ctx.lineTo(particles[b].x, particles[b].y);
@@ -3991,7 +3961,6 @@ setTimeout(() => {
 
   animate();
 })();
-// ═══ /ИНТЕРАКТИВНЫЕ ЧАСТИЦЫ ═══
 </script>
 </body>
 </html>
