@@ -1631,20 +1631,22 @@
 }
 .support-copy-btn:hover { background: rgba(255,255,255,0.07); }
 
-  /* === ПЛАВНЫЕ АНИМАЦИИ МОДАЛЬНЫХ ОКОН === */
+  /* === ПЛАВНЫЕ АНИМАЦИИ МОДАЛЬНЫХ ОКОН (без ломки pointer-events) === */
 
+  /* Modal overlay — оригинал использует display:none/flex, мы анимируем через visibility+opacity */
   .modal-overlay {
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s;
+  }
+  .modal-overlay:not(.open) {
     opacity: 0;
-    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex !important;
-    pointer-events: none;
+    visibility: hidden;
   }
   .modal-overlay.open {
     opacity: 1;
-    pointer-events: all;
+    visibility: visible;
   }
   .modal-overlay:not(.open) .modal {
-    transform: scale(0.92) translateY(20px);
+    transform: scale(0.94) translateY(12px);
     opacity: 0;
   }
   .modal-overlay.open .modal {
@@ -1652,23 +1654,24 @@
     opacity: 1;
   }
   .modal {
-    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Auth modal плавность */
+  /* Auth modal */
   .auth-modal-overlay {
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s;
+  }
+  .auth-modal-overlay:not(.open) {
     opacity: 0;
-    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex !important;
-    pointer-events: none;
+    visibility: hidden;
   }
   .auth-modal-overlay.open {
     opacity: 1;
-    pointer-events: all;
+    visibility: visible;
   }
   .auth-modal-overlay:not(.open) .auth-modal {
-    transform: scale(0.92) translateY(20px);
+    transform: scale(0.94) translateY(12px);
     opacity: 0;
   }
   .auth-modal-overlay.open .auth-modal {
@@ -1676,23 +1679,24 @@
     opacity: 1;
   }
   .auth-modal {
-    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Support modal плавность */
+  /* Support modal */
   .support-overlay {
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s;
+  }
+  .support-overlay:not(.open) {
     opacity: 0;
-    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex !important;
-    pointer-events: none;
+    visibility: hidden;
   }
   .support-overlay.open {
     opacity: 1;
-    pointer-events: all;
+    visibility: visible;
   }
   .support-overlay:not(.open) .support-modal {
-    transform: scale(0.92) translateY(20px);
+    transform: scale(0.94) translateY(12px);
     opacity: 0;
   }
   .support-overlay.open .support-modal {
@@ -1700,16 +1704,16 @@
     opacity: 1;
   }
   .support-modal {
-    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* === УЛУЧШЕННЫЕ СВЕЧЕНИЯ === */
+  /* === УЛУЧШЕННЫЕ СВЕЧЕНИЯ И АНИМАЦИИ === */
 
+  /* Анимированные градиентные шары */
   .orb {
-    transition: all 0.8s ease;
     filter: blur(100px);
-    opacity: 0.22;
+    opacity: 0.25;
   }
   .orb-1 {
     width: 700px; height: 700px;
@@ -1727,7 +1731,7 @@
     width: 400px; height: 400px;
     top: 45%; left: 35%;
     background: radial-gradient(circle, #4f46e5 0%, #312e81 60%, transparent 100%);
-    opacity: 0.15;
+    opacity: 0.18;
     animation: orbFloat3 18s ease-in-out infinite;
   }
   .orb-4 {
@@ -1739,7 +1743,7 @@
     width: 350px; height: 350px;
     bottom: -100px; left: 20%;
     background: radial-gradient(circle, #c084fc 0%, #7c3aed 60%, transparent 100%);
-    opacity: 0.12;
+    opacity: 0.15;
     animation: orbFloat4 20s ease-in-out infinite;
   }
 
@@ -1762,7 +1766,72 @@
     50% { transform: translate(-40px, -30px) scale(1.2); }
   }
 
-  /* Светящиеся границы карточек при hover */
+  /* === HOVER ДЛЯ LATEST RECORDING КАК У ОБЫЧНЫХ КАРТОЧЕК === */
+  .hero-latest-card {
+    position: relative;
+    transition: border-color 0.3s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  }
+  .hero-latest-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 15px;
+    padding: 1px;
+    background: linear-gradient(135deg, transparent 40%, rgba(192,132,252,0.3) 50%, transparent 60%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .hero-latest-card:hover::before {
+    opacity: 1;
+    animation: borderGlow 2s ease-in-out infinite;
+  }
+  .hero-latest-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(192,132,252,0.08), 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .hero-latest-card:hover .hero-latest-thumb img,
+  .hero-latest-card:hover .hero-latest-thumb .hero-latest-play {
+    transform: scale(1.04);
+  }
+  .hero-latest-thumb img,
+  .hero-latest-thumb .hero-latest-play {
+    transition: transform 0.3s ease;
+  }
+  .hero-latest-card:hover .hero-latest-play {
+    background: rgba(192,132,252,0.3);
+    border-color: var(--accent);
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(192,132,252,0.4);
+  }
+  /* Glow-рамка для latest card при hover */
+  .hero-latest-card::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--pink), var(--accent));
+    background-size: 200% 200%;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
+    filter: blur(8px);
+    animation: gradientShift 3s ease infinite;
+  }
+  .hero-latest-card:hover::after {
+    opacity: 0.4;
+  }
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Светящиеся границы обычных карточек при hover */
   .vod-card::before {
     content: '';
     position: absolute;
@@ -1787,28 +1856,6 @@
     50% { background-position: 100% 50%; }
   }
 
-  /* Светящийся эффект для hero-latest-card */
-  .hero-latest-card::after {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, var(--accent), var(--pink), var(--accent));
-    background-size: 200% 200%;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    z-index: -1;
-    filter: blur(8px);
-    animation: gradientShift 3s ease infinite;
-  }
-  .hero-latest-card:hover::after {
-    opacity: 0.4;
-  }
-  @keyframes gradientShift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-  }
-
   /* Пульсирующее свечение для live индикатора */
   @keyframes livePulse {
     0%, 100% { box-shadow: 0 0 4px var(--live), 0 0 8px var(--live), 0 0 12px var(--live); }
@@ -1817,13 +1864,9 @@
 
   /* Светящийся аватар */
   .avatar-ring::before {
-    content: '';
-    position: absolute;
     inset: -4px;
-    border-radius: 50%;
     background: linear-gradient(135deg, var(--accent), var(--pink), var(--accent));
     background-size: 200% 200%;
-    z-index: 0;
     animation: avatarGlow 4s ease infinite;
     filter: blur(3px);
     opacity: 0.8;
@@ -1866,7 +1909,7 @@
     box-shadow: 0 8px 25px rgba(145,71,255,0.25);
   }
 
-  /* Плавные переходы для всех интерактивных элементов */
+  /* Плавные переходы */
   .chip, .icon-btn, .about-link-btn, .support-da-btn, .support-copy-btn, .modal-close, .support-modal-close {
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -1880,21 +1923,12 @@
   }
 
   /* Плавный скроллбар */
-  ::-webkit-scrollbar {
-    width: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: var(--bg);
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--bg4);
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--accent);
-  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-  /* Плавное появление секций при скролле */
+  /* Плавное появление секций */
   .hero, .filters-bar, main, .about-section, footer {
     animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
   }
@@ -1909,7 +1943,7 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Улучшенный эффект для about-section */
+  /* About section glow */
   .about-container {
     position: relative;
     overflow: hidden;
@@ -1917,10 +1951,8 @@
   .about-container::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
     background: radial-gradient(circle at 30% 30%, rgba(192,132,252,0.03) 0%, transparent 50%),
                 radial-gradient(circle at 70% 70%, rgba(219,39,119,0.03) 0%, transparent 50%);
     animation: aboutGlow 8s ease-in-out infinite;
@@ -2049,9 +2081,6 @@
   /* Светящийся play button */
   .hero-latest-play, .thumb-icon {
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  .hero-latest-card:hover .hero-latest-play {
-    box-shadow: 0 0 20px rgba(192,132,252,0.4);
   }
 
   /* Улучшенный load more button */
@@ -2400,11 +2429,11 @@
     90% { transform: translate(-2%, -1%); }
   }
 
-  /* Улучшенный responsive */
+  /* Responsive */
   @media (max-width: 768px) {
     .orb { display: none; }
     .stars { display: none; }
-    .vod-card::before { display: none; }
+    .vod-card::before, .hero-latest-card::before { display: none; }
   }
 
 </style>
@@ -3577,36 +3606,35 @@ async function init() {
 init();
 
 
-// === ПЛАВНЫЕ АНИМАЦИИ (добавлено поверх существующего кода) ===
+// === ПЛАВНЫЕ АНИМАЦИИ ЗАКРЫТИЯ (добавлено поверх существующего кода) ===
+// Переопределяем close-функции для плавной анимации перед закрытием
 
-// Переопределяем closeModal для плавного закрытия
-const _originalCloseModal = closeModal;
+const _origCloseModal = closeModal;
 closeModal = function() {
   document.getElementById('modalOverlay').classList.remove('open');
-  setTimeout(_originalCloseModal, 350);
+  setTimeout(_origCloseModal, 350);
 };
 
-// Переопределяем closeAuthModal для плавного закрытия  
-const _originalCloseAuthModal = closeAuthModal;
+const _origCloseAuth = closeAuthModal;
 closeAuthModal = function() {
   document.getElementById('authOverlay').classList.remove('open');
-  setTimeout(_originalCloseAuthModal, 350);
+  setTimeout(_origCloseAuth, 350);
 };
 
-// Переопределяем closePlayer для плавного закрытия
-const _originalClosePlayer = closePlayer;
+const _origClosePlayer = closePlayer;
 closePlayer = function() {
   document.getElementById('playerOverlay').classList.remove('open');
-  setTimeout(_originalClosePlayer, 350);
+  setTimeout(_origClosePlayer, 350);
 };
 
 // Плавный скролл для якорных ссылок
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function(e) {
-    e.preventDefault();
-    const target = document.querySelector(this.getAttribute('href'));
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const href = this.getAttribute('href');
+    if (href !== '#') {
+      e.preventDefault();
+      const target = document.querySelector(href);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
 });
