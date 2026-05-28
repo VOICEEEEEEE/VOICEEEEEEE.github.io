@@ -1,27 +1,96 @@
 {
   "name": "cutierover — архив стримов",
   "short_name": "cutierover",
+  "description": "Архив всех стримов cutierover. Смотри VODы по CS:GO, фильмам, IRL и Just Chatting.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0f",
   "theme_color": "#0a0a0f",
-  "orientation": "portrait-primary",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "ru",
+  "dir": "ltr",
   "icons": [
     {
       "src": "https://i.imgur.com/FLcgea4.jpeg",
+      "sizes": "72x72",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.imgur.com/FLcgea4.jpeg",
+      "sizes": "96x96",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.imgur.com/rNexn9C.jpeg",
+      "sizes": "128x128",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.imgur.com/rNexn9C.jpeg",
+      "sizes": "144x144",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.imgur.com/rNexn9C.jpeg",
+      "sizes": "152x152",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.imgur.com/rNexn9C.jpeg",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.imgur.com/rNexn9C.jpeg",
+      "sizes": "384x384",
+      "type": "image/jpeg",
       "purpose": "any maskable"
     },
     {
       "src": "https://i.imgur.com/rNexn9C.jpeg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/jpeg",
       "purpose": "any maskable"
     }
   ],
-  "description": "Архив всех стримов cutierover. Gaming, IRL, Film, Just Chatting.",
   "categories": ["entertainment", "social"],
-  "lang": "ru",
-  "dir": "ltr"
+  "screenshots": [
+    {
+      "src": "https://i.imgur.com/rNexn9C.jpeg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Главная страница архива"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Все VODы",
+      "short_name": "VODs",
+      "description": "Посмотреть все записи",
+      "url": "/",
+      "icons": [{ "src": "https://i.imgur.com/FLcgea4.jpeg", "sizes": "96x96" }]
+    },
+    {
+      "name": "Gaming",
+      "short_name": "Gaming",
+      "description": "Игровые стримы",
+      "url": "/?category=gaming",
+      "icons": [{ "src": "https://i.imgur.com/FLcgea4.jpeg", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://cutierovers.ru/manifest.json"
+    }
+  ],
+  "prefer_related_applications": false
 }
