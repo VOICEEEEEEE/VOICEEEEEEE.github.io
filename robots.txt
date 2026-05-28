@@ -1,9 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin
-Disallow: /api/
-
-Sitemap: https://cutierovers.ru/sitemap.xml
-
-# Crawl-delay для предотвращения перегрузки
-Crawl-delay: 1
