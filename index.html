@@ -4233,5 +4233,495 @@ setTimeout(() => {
   animate();
 })();
 </script>
+ <style>
+/* 1. ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ */
+.theme-toggle {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-right: 4px;
+}
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 12px rgba(192,132,252,0.2);
+  transform: scale(1.1);
+}
+[data-theme="light"] {
+  --bg: #f8f7fa; --bg2: #f0eef5; --bg3: #e8e6ef; --bg4: #dddbe6;
+  --surface: #f5f4f8; --border: rgba(0,0,0,0.07); --border2: rgba(0,0,0,0.12);
+  --text: #1a1825; --text2: #5e5c72; --text3: #9c98b4;
+  --accent: #7c3aed; --accent2: #db2777; --accent-dim: rgba(124,58,237,0.08);
+  --accent-glow: rgba(124,58,237,0.15); --pink: #db2777; --pink-dim: rgba(219,39,119,0.08);
+  --live: #16a34a; --live-dim: rgba(22,163,74,0.08);
+}
+[data-theme="light"] body::before { opacity: 0.15; }
+[data-theme="light"] .stars { opacity: 0.3; }
+
+/* 2. ПРОГРЕСС ПРОСМОТРА на карточках */
+.view-progress {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 0 0 14px 14px;
+  overflow: hidden;
+  z-index: 3;
+}
+.view-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--pink));
+  border-radius: 0 0 14px 14px;
+  transition: width 0.4s ease;
+  box-shadow: 0 0 8px rgba(192,132,252,0.4);
+}
+
+/* 3. ПЛЕЙЛИСТЫ */
+.playlist-section {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px 2rem 8px;
+}
+.playlist-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+.playlist-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0;
+  scrollbar-width: none;
+}
+.playlist-bar::-webkit-scrollbar { display: none; }
+.playlist-chip {
+  padding: 8px 18px;
+  border-radius: 100px;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; align-items: center; gap: 6px;
+}
+.playlist-chip:hover {
+  border-color: var(--border2);
+  color: var(--text);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.playlist-chip.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 15px rgba(192,132,252,0.15);
+}
+.playlist-chip .count {
+  font-size: 10px;
+  background: var(--bg4);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--text3);
+}
+.playlist-chip.active .count {
+  background: rgba(192,132,252,0.2);
+  color: var(--accent);
+}
+
+/* 4. TOAST УВЕДОМЛЕНИЯ */
+.toast-container {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  animation: toastIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  pointer-events: all;
+  max-width: 320px;
+}
+.toast.out { animation: toastOut 0.3s ease forwards; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(40px) scale(0.9); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes toastOut {
+  to { opacity: 0; transform: translateX(40px) scale(0.9); }
+}
+.toast-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--accent-dim);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.toast-content { flex: 1; }
+.toast-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.toast-body { font-size: 12px; color: var(--text2); }
+.toast-close {
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  background: none;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: color 0.2s;
+}
+.toast-close:hover { color: var(--text); }
+
+/* 5. PWA INSTALL BANNER */
+.pwa-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  z-index: 9998;
+  animation: bannerUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes bannerUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.pwa-banner.out { animation: bannerDown 0.3s ease forwards; }
+@keyframes bannerDown {
+  to { opacity: 0; transform: translateX(-50%) translateY(20px); }
+}
+.pwa-banner-text { font-size: 13px; color: var(--text2); }
+.pwa-banner-btn {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #7c3aed, #db2777);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pwa-banner-close {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  color: var(--text3);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* 6. LAZY LOADING SKELETON */
+.vod-card.skeleton {
+  pointer-events: none;
+}
+.vod-card.skeleton .vod-thumb {
+  background: linear-gradient(90deg, var(--bg3) 25%, var(--bg4) 50%, var(--bg3) 75%);
+  background-size: 200% 100%;
+  animation: skeleton 1.5s infinite;
+}
+@keyframes skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 7. ТАЙМКОДЫ в плеере */
+.timecode-bar {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.timecode-chip {
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.timecode-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+.timecode-chip::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-right: 6px;
+}
+
+/* 8. УЛУЧШЕННЫЙ ПОИСК с подсветкой */
+.search-highlight {
+  background: rgba(192,132,252,0.3);
+  color: var(--accent);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+.search-bar.has-results {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(192,132,252,0.2), 0 4px 20px rgba(192,132,252,0.1);
+}
+</style>
+
+<!-- TOAST контейнер -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ═══ 1. ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ═══
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const next = current === 'light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('cutierover-theme', next);
+  showToast(next === 'light' ? '☀️' : '🌙', 'Тема изменена', next === 'light' ? 'Светлая тема включена' : 'Тёмная тема включена');
+}
+// Восстановление темы
+const savedTheme = localStorage.getItem('cutierover-theme');
+if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+
+// ═══ 2. ПРОГРЕСС ПРОСМОТРА (localStorage) ═══
+function getViewProgress(vodId) {
+  return parseFloat(localStorage.getItem('vod-progress-' + vodId) || '0');
+}
+function setViewProgress(vodId, percent) {
+  localStorage.setItem('vod-progress-' + vodId, percent);
+}
+function renderViewProgress() {
+  document.querySelectorAll('.vod-card').forEach(card => {
+    const id = card.dataset.id;
+    const progress = getViewProgress(id);
+    if (progress > 0) {
+      const thumb = card.querySelector('.vod-thumb');
+      if (thumb && !thumb.querySelector('.view-progress')) {
+        thumb.insertAdjacentHTML('beforeend', `
+          <div class="view-progress">
+            <div class="view-progress-fill" style="width:${progress}%"></div>
+          </div>
+        `);
+      }
+    }
+  });
+}
+// Отслеживание прогресса в плеере
+function trackVideoProgress(vodId) {
+  const video = document.getElementById('videoPlayer');
+  if (!video) return;
+  video.addEventListener('timeupdate', () => {
+    if (video.duration) {
+      const percent = (video.currentTime / video.duration * 100).toFixed(1);
+      setViewProgress(vodId, percent);
+    }
+  });
+}
+
+// ═══ 3. ПЛЕЙЛИСТЫ ═══
+function renderPlaylists() {
+  const categories = {};
+  vods.forEach(v => {
+    const cat = v.category || 'other';
+    categories[cat] = (categories[cat] || 0) + 1;
+  });
+  
+  const section = document.createElement('div');
+  section.className = 'playlist-section';
+  section.innerHTML = `
+    <div class="playlist-label">playlists</div>
+    <div class="playlist-bar">
+      <span class="playlist-chip active" onclick="filterPlaylist('all', this)">
+        📁 all <span class="count">${vods.length}</span>
+      </span>
+      ${Object.entries(categories).map(([cat, count]) => `
+        <span class="playlist-chip" onclick="filterPlaylist('${cat}', this)">
+          ${getCatEmoji(cat)} ${cat} <span class="count">${count}</span>
+        </span>
+      `).join('')}
+    </div>
+  `;
+  
+  const filtersBar = document.querySelector('.filters-bar');
+  if (filtersBar) filtersBar.parentNode.insertBefore(section, filtersBar);
+}
+function getCatEmoji(cat) {
+  const map = { gaming: '🎮', film: '🎬', irl: '🌍', 'just chatting': '💬' };
+  return map[cat] || '📄';
+}
+function filterPlaylist(cat, el) {
+  document.querySelectorAll('.playlist-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  filterByTagName(cat === 'all' ? 'all' : cat);
+}
+
+// ═══ 4. TOAST УВЕДОМЛЕНИЯ ═══
+function showToast(icon, title, body, duration = 4000) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `
+    <div class="toast-icon">${icon}</div>
+    <div class="toast-content">
+      <div class="toast-title">${title}</div>
+      <div class="toast-body">${body}</div>
+    </div>
+    <button class="toast-close" onclick="this.parentElement.classList.add('out');setTimeout(()=>this.parentElement.remove(),300)">×</button>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('out');
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+// ═══ 5. PWA INSTALL BANNER ═══
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (!localStorage.getItem('pwa-dismissed')) showPwaBanner();
+});
+function showPwaBanner() {
+  if (document.getElementById('pwaBanner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'pwaBanner';
+  banner.className = 'pwa-banner';
+  banner.innerHTML = `
+    <span class="pwa-banner-text">📲 Добавь сайт на главный экран</span>
+    <button class="pwa-banner-btn" onclick="installPwa()">Установить</button>
+    <button class="pwa-banner-close" onclick="dismissPwa()">×</button>
+  `;
+  document.body.appendChild(banner);
+}
+function installPwa() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+  }
+  dismissPwa();
+}
+function dismissPwa() {
+  localStorage.setItem('pwa-dismissed', '1');
+  const banner = document.getElementById('pwaBanner');
+  if (banner) { banner.classList.add('out'); setTimeout(() => banner.remove(), 300); }
+}
+
+// ═══ 6. SERVICE WORKER РЕГИСТРАЦИЯ ═══
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(reg => console.log('SW registered'))
+    .catch(err => console.log('SW error', err));
+}
+
+// ═══ 7. PUSH УВЕДОМЛЕНИЯ (запрос разрешения) ═══
+function requestPushPermission() {
+  if ('Notification' in window) {
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') showToast('🔔', 'Уведомления включены', 'Ты будешь получать уведомления о новых VOD');
+    });
+  }
+}
+
+// ═══ 8. ТАЙМКОДЫ (демо) ═══
+const TIMECODES = {
+  // Пример: 'vod-id': [{time: 120, label: 'Начало фильма'}, {time: 1800, label: 'Концовка'}]
+};
+function showTimecodes(vodId) {
+  const codes = TIMECODES[vodId] || [];
+  const container = document.getElementById('playerMeta');
+  if (!codes.length || !container) return;
+  const bar = document.createElement('div');
+  bar.className = 'timecode-bar';
+  bar.innerHTML = codes.map(tc => `
+    <span class="timecode-chip" onclick="seekVideo(${tc.time})">
+      ${formatDuration(tc.time)} ${tc.label}
+    </span>
+  `).join('');
+  container.appendChild(bar);
+}
+function seekVideo(seconds) {
+  const video = document.getElementById('videoPlayer');
+  if (video) video.currentTime = seconds;
+}
+
+// ═══ 9. LAZY LOADING для карточек ═══
+function setupLazyLoading() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const card = entry.target;
+        card.classList.remove('skeleton');
+        const img = card.querySelector('img');
+        if (img && img.dataset.src) {
+          img.src = img.dataset.src;
+          img.removeAttribute('data-src');
+        }
+        observer.unobserve(card);
+      }
+    });
+  }, { rootMargin: '50px' });
+  
+  document.querySelectorAll('.vod-card').forEach(card => {
+    card.classList.add('skeleton');
+    observer.observe(card);
+  });
+}
+
+// ═══ 10. ОНЛАЙН/ОФФЛАЙН ИНДИКАТОР ═══
+window.addEventListener('online', () => showToast('🌐', 'Соединение восстановлено', 'Ты снова онлайн'));
+window.addEventListener('offline', () => showToast('📴', 'Нет соединения', 'Сайт работает в офлайн-режиме'));
+
+// ═══ ИНИЦИАЛИЗАЦИЯ ═══
+// Добавляем кнопку темы в хедер
+const headerRight = document.querySelector('.header-right');
+if (headerRight) {
+  const themeBtn = document.createElement('button');
+  themeBtn.className = 'theme-toggle';
+  themeBtn.title = 'Переключить тему';
+  themeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+  themeBtn.onclick = toggleTheme;
+  headerRight.insertBefore(themeBtn, headerRight.firstChild);
+}
+
+// Показываем toast при загрузке
+setTimeout(() => {
+  showToast('✨', 'Сайт обновлён!', 'Новые функции: темы, прогресс, плейлисты', 5000);
+}, 2000);
+</script>
 </body>
 </html>
