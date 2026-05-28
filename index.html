@@ -1,10 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 <link rel="icon" type="image/png" href="https://i.imgur.com/FLcgea4.jpeg">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>cutierover - stream archive</title>
+<title>cutierover — архив стримов | Stream Archive</title>
+<meta name="description" content="Архив всех стримов cutierover (Katherine). Смотри записи стримов по CS:GO, фильмам, IRL и Just Chatting.">
+<meta name="keywords" content="cutierover, стрим, twitch, архив, vod, csgo, игры, стримерша">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://cutierovers.ru/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="cutierover — архив стримов">
+<meta property="og:description" content="Все записи стримов cutierover в одном месте.">
+<meta property="og:image" content="https://i.imgur.com/rNexn9C.jpeg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -2520,6 +2533,8 @@
 </style>
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
+<base target="_blank">
 </head>
 <body>
 <canvas id="particleCanvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.6;"></canvas>
@@ -2881,9 +2896,35 @@
       <input type="text" class="form-input" id="vodTags" placeholder="e.g. minecraft, chill, 100 days">
     </div>
 
+    <!-- FILE UPLOAD TO ARCHIVE.ORG -->
     <div class="form-group">
-      <label class="form-label">video url <span style="color:var(--text3);font-size:10px;text-transform:none;letter-spacing:0">(Google Drive, archive.org, direct link)</span></label>
-      <input type="text" class="form-input" id="vodUrl" placeholder="https://archive.org/download/... or Google Drive link">
+      <label class="form-label">upload to archive.org</label>
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave()" ondrop="handleDrop(event)">
+        <input type="file" id="fileInput" accept="video/mp4,video/webm,video/mkv" style="display:none" onchange="handleFileSelect(event)">
+        <div class="drop-icon" id="dropIcon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="drop-text" id="dropText"><strong>click to upload</strong> or drag & drop</div>
+        <div class="drop-sub" id="dropSub">mp4, webm, mkv — any size</div>
+      </div>
+      <div class="upload-progress" id="uploadProgress" style="margin-top:12px;">
+        <div class="progress-label">
+          <span id="progressText">uploading to archive.org…</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+      <label class="auto-publish-label" style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;">
+        <input type="checkbox" id="autoPublish" checked style="accent-color:var(--accent);width:14px;height:14px;">
+        <span style="font-size:12px;color:var(--text2);">auto-publish after upload</span>
+      </label>
+    </div>
+
+    <div class="form-group" style="margin-top:8px;">
+      <label class="form-label" style="font-size:11px;color:var(--text3);">or paste link if already uploaded</label>
+      <input type="text" class="form-input" id="vodUrl" placeholder="https://archive.org/download/...">
     </div>
     <div class="form-group">
       <label class="form-label">chat json <span style="color:var(--text3);font-size:10px;text-transform:none;letter-spacing:0">(ссылка на JSON чата с GitHub)</span></label>
@@ -2958,14 +2999,14 @@ async function incrementViews(id, currentViews) {
     body: { views: currentViews + 1 },
     prefer: ''
   });
-}
+ }
 
 let vods = [];
 let currentFilter = 'all';
 let currentSort = 'newest';
 let searchQuery = '';
 let visibleCount = 3;
-let selectedFile = null;
+
 
 // ─── RENDER ───────────────────────────────────────────────
 function formatDuration(seconds) {
@@ -3217,16 +3258,25 @@ function handleOverlayClick(e) {
 function resetModal() {
   document.getElementById('vodTitle').value = '';
   document.getElementById('vodTags').value = '';
-  document.getElementById('fileLabel').textContent = 'mp4, mkv, webm — up to 10gb';
   document.getElementById('uploadProgress').classList.remove('show');
   document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressFill').style.background = '';
   document.getElementById('vodUrl').value = '';
   document.getElementById('vodChat').value = '';
   document.getElementById('vodThumbnail').value = '';
   document.getElementById('vodDurH').value = '';
   document.getElementById('vodDurM').value = '';
   document.getElementById('vodDurS').value = '';
+
+  // Reset archive upload state
   selectedFile = null;
+  archiveUrl = null;
+  document.getElementById('dropText').innerHTML = '<strong>click to upload</strong> or drag & drop';
+  document.getElementById('dropSub').textContent = 'mp4, webm, mkv — any size';
+  document.getElementById('dropZone').style.borderColor = '';
+  document.getElementById('dropIcon').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
+  document.getElementById('dropIcon').style.color = '';
+
   document.querySelector('#modalOverlay .modal-title').textContent = 'upload recording';
   document.querySelector('#modalOverlay .form-submit').textContent = 'publish recording';
   document.querySelector('#modalOverlay .form-submit').onclick = submitVod;
@@ -3265,6 +3315,149 @@ function setFile(file) {
 }
 
 // ─── SUBMIT ───────────────────────────────────────────────
+// ─── ARCHIVE.ORG UPLOAD ───────────────────────────────────
+
+
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.add('dragover');
+}
+
+function handleDragLeave() {
+  document.getElementById('dropZone').classList.remove('dragover');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('video/')) setFile(file);
+}
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) setFile(file);
+}
+
+function setFile(file) {
+  selectedFile = file;
+  const mb = (file.size / 1024 / 1024).toFixed(1);
+  document.getElementById('dropText').innerHTML = `<strong>${file.name}</strong>`;
+  document.getElementById('dropSub').textContent = `${mb} MB — ready to upload`;
+  document.getElementById('dropZone').style.borderColor = 'var(--accent)';
+  document.getElementById('dropIcon').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  // Auto-fill title from filename
+  if (!document.getElementById('vodTitle').value) {
+    document.getElementById('vodTitle').value = file.name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
+  }
+
+  // Try to get duration from video metadata
+  const video = document.createElement('video');
+  video.preload = 'metadata';
+  video.onloadedmetadata = function() {
+    const dur = Math.floor(video.duration);
+    document.getElementById('vodDurH').value = Math.floor(dur / 3600);
+    document.getElementById('vodDurM').value = Math.floor((dur % 3600) / 60);
+    document.getElementById('vodDurS').value = dur % 60;
+    window.URL.revokeObjectURL(video.src);
+  };
+  video.src = window.URL.createObjectURL(file);
+
+  // Auto-start upload to archive.org
+  startArchiveUpload(file);
+}
+
+async function startArchiveUpload(file) {
+  const progress = document.getElementById('uploadProgress');
+  const fill = document.getElementById('progressFill');
+  const pct = document.getElementById('progressPct');
+  const txt = document.getElementById('progressText');
+  progress.classList.add('show');
+  txt.textContent = 'preparing upload…';
+
+  try {
+    // Step 1: Get upload URL from archive.org S3-like API
+    const identifier = 'cutierover-' + Date.now();
+    const collection = 'opensource'; // or your own collection
+
+    // Simulate progress while uploading (archive.org doesn't give real progress)
+    let p = 0;
+    const iv = setInterval(() => {
+      p += Math.random() * 8;
+      if (p >= 85) { p = 85; clearInterval(iv); }
+      fill.style.width = p + '%';
+      pct.textContent = Math.round(p) + '%';
+      if (p < 30) txt.textContent = 'connecting to archive.org…';
+      else if (p < 60) txt.textContent = 'uploading… this may take a while';
+      else txt.textContent = 'processing on archive.org…';
+    }, 3000);
+
+    // Use archive.org upload endpoint
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('identifier', identifier);
+    formData.append('collection', collection);
+    formData.append('mediatype', 'movies');
+    formData.append('title', document.getElementById('vodTitle').value || file.name);
+
+    // Upload via archive.org S3 API (anonymous upload)
+    const uploadRes = await fetch('https://s3.us.archive.org/' + identifier + '/' + encodeURIComponent(file.name), {
+      method: 'PUT',
+      headers: {
+        'Content-Type': file.type || 'video/mp4',
+        'x-amz-auto-make-bucket': '1',
+        'x-archive-meta01-collection': collection,
+        'x-archive-meta02-mediatype': 'movies',
+        'x-archive-meta03-title': document.getElementById('vodTitle').value || file.name,
+        'x-archive-meta04-creator': 'cutierover',
+        'x-archive-meta05-subject': 'stream;vod;gaming',
+        'x-archive-meta06-description': 'Stream recording from cutierover',
+        'x-archive-meta07-language': 'rus',
+        'x-archive-meta08-licenseurl': 'https://creativecommons.org/licenses/by/4.0/'
+      },
+      body: file
+    });
+
+    clearInterval(iv);
+
+    if (!uploadRes.ok) {
+      throw new Error('Archive.org upload failed: ' + uploadRes.status);
+    }
+
+    // Construct the direct link
+    archiveUrl = `https://archive.org/download/${identifier}/${encodeURIComponent(file.name)}`;
+
+    fill.style.width = '100%';
+    pct.textContent = '100%';
+    txt.textContent = 'uploaded! link ready';
+
+    // Auto-fill the URL field
+    document.getElementById('vodUrl').value = archiveUrl;
+
+    // Show success in drop zone
+    document.getElementById('dropText').innerHTML = '<strong>uploaded!</strong>';
+    document.getElementById('dropSub').textContent = 'publishing…';
+    document.getElementById('dropZone').style.borderColor = 'var(--live)';
+    document.getElementById('dropIcon').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+    document.getElementById('dropIcon').style.color = 'var(--live)';
+
+    // Auto-publish if enabled
+    if (document.getElementById('autoPublish').checked) {
+      setTimeout(() => submitVod(), 1500);
+    }
+
+  } catch(e) {
+    clearInterval(iv);
+    fill.style.width = '100%';
+    fill.style.background = '#f87171';
+    pct.textContent = 'error';
+    txt.textContent = 'upload failed — paste link manually';
+    console.error('Archive upload error:', e);
+  }
+}
+
 async function submitVod() {
   const title = document.getElementById('vodTitle').value.trim();
   if (!title) { document.getElementById('vodTitle').focus(); return; }
@@ -3273,7 +3466,12 @@ async function submitVod() {
   const fill = document.getElementById('progressFill');
   const pct = document.getElementById('progressPct');
   const txt = document.getElementById('progressText');
-  progress.classList.add('show');
+
+  // Only show progress if we were uploading a file
+  const wasUploading = selectedFile && archiveUrl;
+  if (wasUploading) {
+    progress.classList.add('show');
+  }
 
   // Анимация прогресса
   let p = 0;
@@ -3293,7 +3491,7 @@ async function submitVod() {
     tags: document.getElementById('vodTags').value,
     duration: ((parseInt(document.getElementById('vodDurH').value)||0) * 3600) + ((parseInt(document.getElementById('vodDurM').value)||0) * 60) + (parseInt(document.getElementById('vodDurS').value)||0),
     views: 0,
-    url: document.getElementById('vodUrl').value.trim(),
+    url: archiveUrl || document.getElementById('vodUrl').value.trim() || null,
     thumbnail: document.getElementById('vodThumbnail').value.trim(),
     chat_url: document.getElementById('vodChat').value.trim() || null
   };
@@ -3494,7 +3692,7 @@ async function saveEditVod() {
     category: document.getElementById('vodCategory').value,
     tags: document.getElementById('vodTags').value,
     duration: ((parseInt(document.getElementById('vodDurH').value)||0) * 3600) + ((parseInt(document.getElementById('vodDurM').value)||0) * 60) + (parseInt(document.getElementById('vodDurS').value)||0),
-    url: document.getElementById('vodUrl').value.trim(),
+    url: archiveUrl || document.getElementById('vodUrl').value.trim() || null,
     thumbnail: document.getElementById('vodThumbnail').value.trim(),
     chat_url: document.getElementById('vodChat').value.trim() || null
   };
@@ -3534,6 +3732,8 @@ async function deleteVod(id) {
 // ─── AUTH ─────────────────────────────────────────────────
 let isAdmin = false;
 let supabaseSession = null;
+let archiveUrl = null;
+let selectedFile = null;
 
 async function signIn(email, password) {
   const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
