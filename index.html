@@ -2535,8 +2535,10 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
+<div class="rate-limit-bar" id="rateLimitBar"></div>
 <canvas id="particleCanvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.6;"></canvas>
 
 
@@ -2822,6 +2824,15 @@
     <h2 class="modal-title" id="playerTitle" style="margin-bottom:16px;font-size:18px;padding-right:32px;"></h2>
     <div id="playerContainer" style="width:100%;display:flex;gap:0;border-radius:10px;overflow:hidden;background:#000;height:60vh;">
       <div style="flex:1;min-width:0;position:relative;display:flex;align-items:center;justify-content:center;">
+        <button class="pip-btn" id="pipBtn" onclick="togglePiP()" title="Picture-in-Picture">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="14" rx="2"/><rect x="7" y="17" width="10" height="4" rx="1"/></svg>
+        </button>
+        <div class="player-controls-overlay">
+          <button class="player-ctrl-btn" onclick="seekRelative(-10)" title="-10s">⏪</button>
+          <button class="player-ctrl-btn" onclick="togglePlay()" title="Play/Pause" id="playPauseBtn">⏯</button>
+          <button class="player-ctrl-btn" onclick="seekRelative(10)" title="+10s">⏩</button>
+          <button class="player-ctrl-btn" onclick="toggleMute()" title="Mute" id="muteBtn">🔊</button>
+        </div>
         <video id="videoPlayer" controls style="width:100%;height:100%;display:none;" preload="metadata"></video>
         <iframe id="iframePlayer" style="width:100%;height:100%;border:none;display:none;" allowfullscreen allow="autoplay"></iframe>
         <div id="playerMsg" style="color:var(--text2);font-size:14px;text-align:center;padding:20px;display:none;"></div>
@@ -2831,6 +2842,13 @@
           <span style="font-family:var(--font-mono);font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">chat replay</span>
           <span id="chatCount" style="font-family:var(--font-mono);font-size:10px;color:var(--text3);margin-left:auto;"></span>
         </div>
+      <!-- Chat Search -->
+      <div id="chatSearchBox" style="display:none;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg2);">
+        <div class="search-bar" style="width:100%;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="chatSearchInput" placeholder="search in chat…" oninput="searchChat(this.value)" style="width:100%;font-size:12px;">
+        </div>
+      </div>
         <div id="chatMessages" style="flex:1;overflow-y:auto;padding:8px 0;scroll-behavior:smooth;"></div>
       </div>
     </div>
@@ -4498,6 +4516,166 @@ setTimeout(() => {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(192,132,252,0.2), 0 4px 20px rgba(192,132,252,0.1);
 }
+
+/* ═══ ПОИСК ПО ЧАТУ ═══ */
+.chat-highlight {
+  background: rgba(192,132,252,0.25);
+  border-radius: 3px;
+  padding: 0 2px;
+  animation: highlightPulse 1s ease;
+}
+@keyframes highlightPulse {
+  0% { background: rgba(192,132,252,0.5); }
+  100% { background: rgba(192,132,252,0.25); }
+}
+.chat-msg-hidden { display: none !important; }
+
+/* ═══ PICTURE-IN-PICTURE ═══ */
+.pip-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  z-index: 10;
+  transition: all 0.2s;
+}
+.pip-btn:hover {
+  background: rgba(192,132,252,0.4);
+  border-color: var(--accent);
+}
+#playerContainer:hover .pip-btn { display: flex; }
+
+/* ═══ МОБИЛЬНЫЕ ЖЕСТЫ ═══ */
+@media (max-width: 768px) {
+  .swipe-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    color: var(--text2);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    z-index: 100;
+    animation: swipeHint 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes swipeHint {
+    0%, 100% { opacity: 0.3; transform: translateX(-50%) translateX(-10px); }
+    50% { opacity: 0.8; transform: translateX(-50%) translateX(10px); }
+  }
+}
+
+/* ═══ ГОРЯЧИЕ КЛАВИШИ ПОДСКАЗКА ═══ */
+.hotkeys-hint {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text3);
+  z-index: 50;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+.hotkeys-hint.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.hotkeys-hint kbd {
+  background: var(--bg4);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-size: 10px;
+}
+
+/* ═══ RATE LIMIT ИНДИКАТОР ═══ */
+.rate-limit-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--pink));
+  z-index: 99999;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.rate-limit-bar.active {
+  transform: scaleX(1);
+  animation: ratePulse 2s ease-in-out infinite;
+}
+@keyframes ratePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ═══ УЛУЧШЕННЫЙ ПЛЕЕР ═══ */
+.player-controls-overlay {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+#playerContainer:hover .player-controls-overlay {
+  opacity: 1;
+  pointer-events: all;
+}
+.player-ctrl-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+}
+.player-ctrl-btn:hover {
+  background: rgba(192,132,252,0.4);
+  border-color: var(--accent);
+}
+
+/* ═══ DISCORD WEBHOOK TOAST ═══ */
+.discord-toast {
+  background: linear-gradient(135deg, #5865F2, #4752C4);
+  color: #fff;
+}
+.discord-toast .toast-icon {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+}
+
 </style>
 
 <!-- TOAST контейнер -->
@@ -4722,6 +4900,303 @@ if (headerRight) {
 setTimeout(() => {
   showToast('✨', 'Сайт обновлён!', 'Новые функции: темы, прогресс, плейлисты', 5000);
 }, 2000);
+
+// ═══ ПОИСК ПО ЧАТУ ═══
+function searchChat(query) {
+  const messages = document.getElementById('chatMessages');
+  if (!messages) return;
+  const q = query.toLowerCase().trim();
+  messages.querySelectorAll('div').forEach(msg => {
+    const text = msg.textContent.toLowerCase();
+    if (!q) {
+      msg.classList.remove('chat-msg-hidden');
+      msg.querySelectorAll('.chat-highlight').forEach(h => {
+        const parent = h.parentNode;
+        parent.replaceChild(document.createTextNode(h.textContent), h);
+        parent.normalize();
+      });
+    } else if (text.includes(q)) {
+      msg.classList.remove('chat-msg-hidden');
+      highlightText(msg, q);
+    } else {
+      msg.classList.add('chat-msg-hidden');
+    }
+  });
+}
+function highlightText(element, query) {
+  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const text = node.textContent;
+    const idx = text.toLowerCase().indexOf(query);
+    if (idx !== -1) {
+      const span = document.createElement('span');
+      span.className = 'chat-highlight';
+      span.textContent = text.substring(idx, idx + query.length);
+      const before = document.createTextNode(text.substring(0, idx));
+      const after = document.createTextNode(text.substring(idx + query.length));
+      const parent = node.parentNode;
+      parent.insertBefore(before, node);
+      parent.insertBefore(span, node);
+      parent.insertBefore(after, node);
+      parent.removeChild(node);
+    }
+  });
+}
+
+// ═══ PICTURE-IN-PICTURE ═══
+async function togglePiP() {
+  const video = document.getElementById('videoPlayer');
+  if (!video || video.style.display === 'none') return;
+  try {
+    if (document.pictureInPictureElement) {
+      await document.exitPictureInPicture();
+    } else {
+      await video.requestPictureInPicture();
+    }
+  } catch(e) {
+    showToast('❌', 'PiP не поддерживается', 'Ваш браузер не поддерживает Picture-in-Picture');
+  }
+}
+
+// ═══ ГОРЯЧИЕ КЛАВИШИ ПЛЕЕРА ═══
+document.addEventListener('keydown', (e) => {
+  const overlay = document.getElementById('playerOverlay');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  if (e.target.tagName === 'INPUT') return;
+
+  const video = document.getElementById('videoPlayer');
+  if (!video || video.style.display === 'none') return;
+
+  switch(e.key) {
+    case ' ': e.preventDefault(); togglePlay(); break;
+    case 'ArrowLeft': e.preventDefault(); seekRelative(-10); break;
+    case 'ArrowRight': e.preventDefault(); seekRelative(10); break;
+    case 'ArrowUp': e.preventDefault(); video.volume = Math.min(1, video.volume + 0.1); break;
+    case 'ArrowDown': e.preventDefault(); video.volume = Math.max(0, video.volume - 0.1); break;
+    case 'm': case 'M': toggleMute(); break;
+    case 'f': case 'F': toggleFullscreen(); break;
+    case 'p': case 'P': togglePiP(); break;
+    case 'Escape': closePlayer(); break;
+  }
+});
+
+function togglePlay() {
+  const video = document.getElementById('videoPlayer');
+  if (!video) return;
+  video.paused ? video.play() : video.pause();
+}
+function seekRelative(seconds) {
+  const video = document.getElementById('videoPlayer');
+  if (!video) return;
+  video.currentTime = Math.max(0, Math.min(video.duration || Infinity, video.currentTime + seconds));
+}
+function toggleMute() {
+  const video = document.getElementById('videoPlayer');
+  if (!video) return;
+  video.muted = !video.muted;
+  const btn = document.getElementById('muteBtn');
+  if (btn) btn.textContent = video.muted ? '🔇' : '🔊';
+}
+function toggleFullscreen() {
+  const container = document.getElementById('playerContainer');
+  if (!container) return;
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    container.requestFullscreen();
+  }
+}
+
+// Показываем подсказку горячих клавиш
+let hotkeysTimeout;
+document.getElementById('playerOverlay').addEventListener('mouseenter', () => {
+  const hint = document.getElementById('hotkeysHint');
+  if (hint) {
+    hint.classList.add('visible');
+    clearTimeout(hotkeysTimeout);
+    hotkeysTimeout = setTimeout(() => hint.classList.remove('visible'), 5000);
+  }
+});
+
+// ═══ RATE LIMITING ═══
+const RATE_LIMIT = { uploads: 0, lastReset: Date.now(), max: 5, window: 60000 };
+function checkRateLimit() {
+  const now = Date.now();
+  if (now - RATE_LIMIT.lastReset > RATE_LIMIT.window) {
+    RATE_LIMIT.uploads = 0;
+    RATE_LIMIT.lastReset = now;
+  }
+  if (RATE_LIMIT.uploads >= RATE_LIMIT.max) {
+    showToast('⏳', 'Слишком быстро', 'Подожди минуту перед следующей загрузкой');
+    return false;
+  }
+  RATE_LIMIT.uploads++;
+  const bar = document.getElementById('rateLimitBar');
+  if (bar) {
+    bar.classList.add('active');
+    setTimeout(() => bar.classList.remove('active'), 1000);
+  }
+  return true;
+}
+
+// Переопределяем submitVod с rate limit
+const _originalSubmitVod = submitVod;
+submitVod = async function() {
+  if (!checkRateLimit()) return;
+  return _originalSubmitVod.apply(this, arguments);
+};
+
+// ═══ DISCORD WEBHOOK ═══
+async function sendDiscordWebhook(vod) {
+  const webhookUrl = localStorage.getItem('discord_webhook');
+  if (!webhookUrl) return;
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        embeds: [{
+          title: '📹 Новый VOD: ' + (vod.title || 'Untitled'),
+          description: `Категория: ${vod.category || 'N/A'}
+Длительность: ${formatDuration(vod.duration)}`,
+          color: 0xc084fc,
+          timestamp: new Date().toISOString(),
+          footer: { text: 'cutierover archive' },
+          image: vod.thumbnail ? { url: vod.thumbnail } : undefined
+        }]
+      })
+    });
+  } catch(e) { console.log('Discord webhook failed', e); }
+}
+
+// Переопределяем insertVod для Discord
+const _originalInsertVod = insertVod;
+insertVod = async function(vod) {
+  const result = await _originalInsertVod.apply(this, arguments);
+  if (result) sendDiscordWebhook(vod);
+  return result;
+};
+
+// ═══ МОБИЛЬНЫЕ ЖЕСТЫ (свайп) ═══
+let touchStartX = 0;
+let touchStartY = 0;
+const SWIPE_THRESHOLD = 80;
+
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > SWIPE_THRESHOLD) {
+    const overlay = document.getElementById('playerOverlay');
+    if (overlay && overlay.classList.contains('open')) {
+      if (dx < 0) nextVod();
+      else prevVod();
+    }
+  }
+}, { passive: true });
+
+function nextVod() {
+  const currentId = window._currentVodId;
+  if (!currentId) return;
+  const idx = vods.findIndex(v => String(v.id) === String(currentId));
+  if (idx !== -1 && idx < vods.length - 1) {
+    openVod(vods[idx + 1].id);
+  }
+}
+function prevVod() {
+  const currentId = window._currentVodId;
+  if (!currentId) return;
+  const idx = vods.findIndex(v => String(v.id) === String(currentId));
+  if (idx > 0) {
+    openVod(vods[idx - 1].id);
+  }
+}
+
+// Сохраняем текущий VOD
+const _originalOpenVod = openVod;
+openVod = async function(id) {
+  window._currentVodId = id;
+  trackVideoProgress(id);
+  showTimecodes(id);
+  return _originalOpenVod.apply(this, arguments);
+};
+
+// ═══ УЛУЧШЕННЫЙ ЧАТ (показываем поиск) ═══
+const _originalOpenVodChat = openVod;
+openVod = async function(id) {
+  const result = await _originalOpenVod.apply(this, arguments);
+  const vod = vods.find(v => String(v.id) === String(id));
+  if (vod && vod.chat_url) {
+    document.getElementById('chatSearchBox').style.display = 'block';
+  } else {
+    document.getElementById('chatSearchBox').style.display = 'none';
+  }
+  return result;
+};
+
+// ═══ ВАЛИДАЦИЯ ФАЙЛОВ ═══
+function validateFile(file) {
+  const validTypes = ['video/mp4', 'video/webm', 'video/mkv', 'video/x-matroska'];
+  const maxSize = 10 * 1024 * 1024 * 1024; // 10GB
+  if (!validTypes.includes(file.type) && !file.name.match(/\.(mp4|webm|mkv)$/i)) {
+    showToast('❌', 'Неверный формат', 'Разрешены только MP4, WebM, MKV');
+    return false;
+  }
+  if (file.size > maxSize) {
+    showToast('❌', 'Файл слишком большой', 'Максимум 10GB');
+    return false;
+  }
+  return true;
+}
+
+// Переопределяем setFile
+const _originalSetFile = setFile;
+setFile = function(file) {
+  if (!validateFile(file)) return;
+  return _originalSetFile.apply(this, arguments);
+};
+
+// ═══ TELEGRAM БОТ WEBHOOK (упрощённый) ═══
+async function sendTelegramNotification(vod) {
+  const botToken = localStorage.getItem('tg_bot_token');
+  const chatId = localStorage.getItem('tg_chat_id');
+  if (!botToken || !chatId) return;
+  try {
+    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: `📹 Новый VOD: ${vod.title || 'Untitled'}
+Категория: ${vod.category || 'N/A'}
+Длительность: ${formatDuration(vod.duration)}`,
+        parse_mode: 'HTML'
+      })
+    });
+  } catch(e) { console.log('Telegram webhook failed', e); }
+}
+
+// ═══ ИНИЦИАЛИЗАЦИЯ ПЛЕЙЛИСТОВ ПОСЛЕ ЗАГРУЗКИ ═══
+const _originalInit = init;
+init = async function() {
+  await _originalInit.apply(this, arguments);
+  setTimeout(() => {
+    renderPlaylists();
+    renderViewProgress();
+    setupLazyLoading();
+    requestPushPermission();
+  }, 500);
+};
+
 </script>
+<div class="hotkeys-hint" id="hotkeysHint">
+  <kbd>Space</kbd> play · <kbd>←</kbd><kbd>→</kbd> seek · <kbd>M</kbd> mute · <kbd>F</kbd> fullscreen · <kbd>P</kbd> PiP
+</div>
 </body>
 </html>
