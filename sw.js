@@ -9,19 +9,21 @@ const STATIC_ASSETS = [
 // Install — кэшируем статику
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(STATIC_ASSETS);
+    }).then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
 // Activate — чистим старые кэши
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+      );
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 // Fetch — стратегия stale-while-revalidate для API, cache-first для статики
@@ -29,48 +31,103 @@ self.addEventListener('fetch', (e) => {
   const { request } = e;
   const url = new URL(request.url);
 
-  // API запросы — network first с fallback
-  if (url.pathname.includes('/rest/v1/')) {
+  // API запросы — сеть с fallback на кэш
+  if (url.hostname.includes('supabase.co')) {
     e.respondWith(
-      fetch(request).catch(() => caches.match(request))
+      fetch(request)
+        .then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+          return response;
+        })
+        .catch(() => caches.match(request))
     );
     return;
   }
 
-  // Статика — cache first
-  e.respondWith(
-    caches.match(request).then(cached => {
-      const fetchPromise = fetch(request).then(response => {
-        if (response.ok) {
+  // Статика — кэш first
+  if (request.method === 'GET') {
+    e.respondWith(
+      caches.match(request).then(cached => {
+        if (cached) {
+          // Обновляем кэш в фоне
+          fetch(request).then(response => {
+            caches.open(CACHE_NAME).then(cache => cache.put(request, response));
+          }).catch(() => {});
+          return cached;
+        }
+        return fetch(request).then(response => {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
-        }
-        return response;
-      }).catch(() => cached);
-      return cached || fetchPromise;
-    })
-  );
+          return response;
+        });
+      })
+    );
+  }
 });
 
-// Push уведомления о новых VOD
+// Background Sync — отложенная отправка данных
+self.addEventListener('sync', (e) => {
+  if (e.tag === 'sync-vods') {
+    e.waitUntil(syncPendingVods());
+  }
+});
+
+async function syncPendingVods() {
+  const db = await openDB('cutierover', 1);
+  const pending = await db.getAll('pendingVods');
+  for (const vod of pending) {
+    try {
+      await fetch(`${self.location.origin}/api/vods`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(vod)
+      });
+      await db.delete('pendingVods', vod.id);
+    } catch(e) {
+      console.log('Sync failed for vod', vod.id);
+    }
+  }
+}
+
+// Push notifications
 self.addEventListener('push', (e) => {
   const data = e.data?.json() || {};
   e.waitUntil(
-    self.registration.showNotification(data.title || 'Новый VOD!', {
-      body: data.body || 'cutierover загрузила новую запись стрима',
-      icon: 'https://i.imgur.com/FLcgea4.jpeg',
+    self.registration.showNotification(data.title || 'cutierover', {
+      body: data.body || 'Новый VOD доступен!',
+      icon: 'https://i.imgur.com/rNexn9C.jpeg',
       badge: 'https://i.imgur.com/FLcgea4.jpeg',
       tag: 'new-vod',
       requireInteraction: true,
-      data: { url: data.url || '/' }
+      actions: [
+        { action: 'open', title: 'Смотреть' },
+        { action: 'close', title: 'Закрыть' }
+      ]
     })
   );
 });
 
-// Клик по уведомлению
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
-  e.waitUntil(
-    clients.openWindow(e.notification.data?.url || '/')
-  );
+  if (e.action === 'open' || !e.action) {
+    e.waitUntil(
+      clients.openWindow('/')
+    );
+  }
 });
+
+// IndexedDB helper
+function openDB(name, version) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(name, version);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('pendingVods')) {
+        db.createObjectStore('pendingVods', { keyPath: 'id' });
+      }
+    };
+  });
+}
