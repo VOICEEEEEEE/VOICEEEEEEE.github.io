@@ -1,344 +1,4223 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>cutierover - stream archive</title>
-  <link rel="icon" type="image/png" href="https://i.imgur.com/FLcgea4.jpeg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <base target="_blank">
+<link rel="icon" type="image/png" href="https://i.imgur.com/FLcgea4.jpeg">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>cutierover - stream archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #18181f;
+    --bg4: #22222c;
+    --surface: #1c1c26;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #f0eef8;
+    --text2: #9c98b4;
+    --text3: #5e5c72;
+    --accent: #c084fc;
+    --accent2: #e879f9;
+    --accent-dim: rgba(192,132,252,0.12);
+    --accent-glow: rgba(192,132,252,0.25);
+    --pink: #f472b6;
+    --pink-dim: rgba(244,114,182,0.1);
+    --live: #4ade80;
+    --live-dim: rgba(74,222,128,0.12);
+    --font-serif: 'DM Serif Display', Georgia, serif;
+    --font-sans: 'Outfit', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; overflow-x: hidden; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    background-size: 256px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* Gradient orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.18;
+  }
+  .orb-1 { width: 600px; height: 600px; top: -200px; left: -100px; background: #7c3aed; }
+  .orb-2 { width: 400px; height: 400px; bottom: 200px; right: -150px; background: #db2777; max-width: none; }
+  .orb-3 { width: 300px; height: 300px; top: 40%; left: 40%; background: #4f46e5; opacity: 0.1; }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    background: rgba(10,10,15,0.7);
+    padding: 0 2rem;
+  }
+
+  .header-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    height: 64px;
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .logo-mark {
+    box-shadow: 0 0 0 2px #c084fc;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--pink));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-size: 16px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .logo-text {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .logo-text span {
+    color: var(--accent);
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  nav a {
+    text-decoration: none;
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 400;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+  }
+
+  nav a:hover { color: var(--text); background: var(--bg3); }
+  nav a.active { color: var(--accent); background: var(--accent-dim); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    transition: border-color 0.2s;
+  }
+
+  .search-bar:focus-within {
+    border-color: var(--accent);
+  }
+
+  .search-bar svg { color: var(--text3); flex-shrink: 0; }
+
+  .search-bar input {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    width: 160px;
+  }
+
+  .search-bar input::placeholder { color: var(--text3); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 48px 2rem 32px;
+  }
+
+  .hero-profile {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 0;
+  }
+
+  .hero-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+    margin-bottom: 32px;
+  }
+
+  .hero-right {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 0;
+  }
+
+  .hero-latest-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+
+  .hero-latest-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hero-latest-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-2px);
+  }
+
+  .hero-latest-thumb {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #1a1025, #0f0818);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-latest-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero-latest-play {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    position: relative;
+    z-index: 1;
+    transition: all 0.2s;
+  }
+
+  .hero-latest-card:hover .hero-latest-play {
+    background: rgba(192,132,252,0.3);
+    border-color: var(--accent);
+    transform: scale(1.1);
+  }
+
+  .hero-latest-play svg { width: 16px; height: 16px; color: #fff; margin-left: 3px; }
+
+  .hero-latest-dur {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #fff;
+    background: rgba(0,0,0,0.7);
+    padding: 2px 7px;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+    z-index: 1;
+  }
+
+  .hero-latest-body {
+    padding: 12px 14px;
+  }
+
+  .hero-latest-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+
+  .hero-latest-meta {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+  }
+
+  .hero-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .hero-stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+
+  .hero-stat-box .stat-num {
+    font-size: 26px;
+  }
+
+  .hero-stat-box .stat-label {
+    font-size: 10px;
+  }
+
+.avatar-ring {
+  position: relative;
+  flex-shrink: 0;
+}
+
+  .avatar-ring::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--pink));
+    z-index: 0;
+  }
+
+  .avatar {
+    position: relative;
+    z-index: 1;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: var(--bg4);
+    border: 3px solid var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-size: 36px;
+    color: var(--accent);
+    overflow: hidden;
+  }
+
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+  }
+
+  .hero-info { flex: 1; }
+
+  .streamer-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .streamer-tag::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: var(--font-serif);
+    font-size: clamp(3rem, 5.5vw, 5rem);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-desc {
+    font-size: 17px;
+    color: var(--text2);
+    line-height: 1.6;
+    max-width: 480px;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 28px;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-num {
+    font-family: var(--font-mono);
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .stat-divider {
+    width: 1px;
+    background: var(--border);
+    align-self: stretch;
+    margin: 4px 0;
+  }
+
+  /* Twitch badge */
+  .twitch-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    background: rgba(145,71,255,0.15);
+    border: 1px solid rgba(145,71,255,0.3);
+    color: #bf94ff;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px 20px;
+    border-radius: 10px;
+    transition: all 0.2s;
+    margin-top: 0;
+  }
+
+  .twitch-link:hover {
+    background: rgba(145,71,255,0.25);
+    border-color: rgba(145,71,255,0.5);
+  }
+
+  .hero-buttons .twitch-link,
+  .hero-buttons button.twitch-link {
+    margin-top: 0;
+  }
+
+  /* ── FILTERS ── */
+  .filters-bar {
+    position: relative;
+    z-index: 5;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 2rem 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .filters-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .filters-left .filter-label {
+    margin-right: 4px;
+  }
+  .filters-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .filter-label {
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: var(--text3);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+
+  .filter-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    padding: 5px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 400;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    background: var(--bg3);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .chip:hover {
+    border-color: var(--border2);
+    color: var(--text);
+  }
+
+  .chip.active {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .filter-sep {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+    margin: 0 4px;
+  }
+
+  .sort-select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    appearance: none;
+    padding-right: 28px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235e5c72' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+  }
+
+  .sort-select:focus { border-color: var(--accent); }
+
+  /* Upload button */
+  .upload-btn {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    background: linear-gradient(135deg, #7c3aed, #db2777);
+    color: #fff;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    text-decoration: none;
+  }
+
+  .upload-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .upload-btn:active { transform: translateY(0); }
+
+  /* ── VIDEO GRID ── */
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 2rem 40px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .section-title {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .section-count {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text3);
+    background: var(--bg3);
+    padding: 3px 10px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+  }
+
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  /* ── VOD CARD ── */
+  .vod-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .vod-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-3px);
+  }
+
+  .vod-thumb {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--bg4);
+    overflow: hidden;
+  }
+
+  .vod-thumb-inner {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1025 0%, #0f0818 50%, #13101f 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .vod-card:hover .vod-thumb-inner {
+    transform: scale(1.04);
+  }
+
+  .thumb-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.35;
+    background-image: 
+      repeating-linear-gradient(45deg, transparent, transparent 30px, rgba(192,132,252,0.1) 30px, rgba(192,132,252,0.1) 31px),
+      repeating-linear-gradient(-45deg, transparent, transparent 30px, rgba(244,114,182,0.08) 30px, rgba(244,114,182,0.08) 31px);
+  }
+
+  .thumb-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s;
+  }
+
+  .vod-card:hover .thumb-icon {
+    background: rgba(192,132,252,0.2);
+    border-color: var(--accent);
+    transform: scale(1.1);
+  }
+
+  .thumb-icon svg {
+    width: 20px;
+    height: 20px;
+    color: var(--text);
+    margin-left: 3px;
+  }
+
+  .vod-duration {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: #fff;
+    background: rgba(0,0,0,0.7);
+    padding: 2px 7px;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+    letter-spacing: 0.04em;
+  }
+
+  .vod-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .badge-new {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid rgba(192,132,252,0.3);
+  }
+
+  .badge-live {
+    background: var(--live-dim);
+    color: var(--live);
+    border: 1px solid rgba(74,222,128,0.3);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .badge-live::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--live);
+    animation: blink 1.2s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Card body */
+  .vod-body {
+    padding: 14px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .vod-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    letter-spacing: -0.01em;
+  }
+
+  .vod-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+  }
+
+  .vod-meta-dot {
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: var(--text3);
+  }
+
+  .vod-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+
+  .tag {
+    font-size: 11px;
+    color: var(--text3);
+    background: var(--bg4);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    font-weight: 400;
+  }
+
+  .tag-game {
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-color: rgba(192,132,252,0.2);
+  }
+
+  .vod-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .vod-views {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+  }
+
+  .vod-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text3);
+  }
+
+  .icon-btn:hover {
+    border-color: var(--border2);
+    color: var(--text);
+    background: var(--bg3);
+  }
+
+  .icon-btn svg { width: 14px; height: 14px; }
+
+  /* ── UPLOAD MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 520px;
+    padding: 32px;
+    position: relative;
+    animation: modal-in 0.25s ease;
+  }
+
+  @keyframes modal-in {
+    from { opacity: 0; transform: scale(0.96) translateY(8px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .modal-close:hover { color: var(--text); border-color: var(--border2); }
+
+  .modal-title {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .modal-sub {
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-input:focus {
+    border-color: var(--accent);
+  }
+
+  .form-input::placeholder { color: var(--text3); }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  /* Drop zone */
+  .drop-zone {
+    border: 2px dashed var(--border2);
+    border-radius: 12px;
+    padding: 36px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg3);
+    margin-bottom: 18px;
+  }
+
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .drop-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(192,132,252,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    color: var(--accent);
+  }
+
+  .drop-icon svg { width: 22px; height: 22px; }
+
+  .drop-text {
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 4px;
+  }
+
+  .drop-text strong { color: var(--accent); font-weight: 500; }
+
+  .drop-sub {
+    font-size: 12px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+  }
+
+  .form-submit {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #7c3aed, #db2777);
+    color: #fff;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    letter-spacing: 0.01em;
+  }
+
+  .form-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+  .form-submit:active { transform: translateY(0); }
+
+  /* ── PROGRESS ── */
+  .upload-progress {
+    display: none;
+    margin-top: 16px;
+  }
+
+  .upload-progress.show { display: block; }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: var(--text3);
+    margin-bottom: 8px;
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--bg4);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--pink));
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 32px 2rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+  }
+
+  footer a { color: var(--text3); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 20px;
+    display: none;
+  }
+
+  .empty-state.show { display: block; }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  .empty-title {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    color: var(--text2);
+    margin-bottom: 8px;
+  }
+
+  .empty-sub { font-size: 14px; color: var(--text3); }
+
+  
+  /* Search desktop/mobile visibility */
+  .search-desktop { display: flex; align-items: center; }
+  .search-mobile { display: none; width: 100%; }
+  .search-mobile .search-bar { width: 100%; }
+  .search-mobile .search-bar input { width: 100%; display: block !important; }
+
+  /* Responsive */
+@media (max-width: 768px) {
+  /* Header */
+  header { width: 100%; }
+  .header-inner { width: 100%; padding: 0 16px; gap: 8px; }
+  nav { display: none; }
+  .search-desktop { display: none !important; }
+  .search-mobile { display: block !important; }
+  .header-right { gap: 6px; }
+  .search-bar { flex: 1; min-width: 0; }
+  .search-bar input { width: 100%; font-size: 12px; display: block !important; }
+  .upload-btn { font-size: 11px; padding: 6px 10px; }
+  .admin-badge { font-size: 10px; padding: 4px 8px; }
+  #loginBtn { font-size: 11px; padding: 6px 10px; }
+
+  /* Hero */
+  .hero { padding: 24px 16px; }
+  .hero-layout { grid-template-columns: 1fr; }
+  .hero-right { display: none; }
+  .hero-profile { flex-direction: column; align-items: flex-start; gap: 16px; }
+  h1 { font-size: 2rem; }
+  .hero-desc { font-size: 13px; }
+  .hero-stats { gap: 20px; }
+  .stat-num { font-size: 1.6rem; }
+  .avatar { width: 100px; height: 100px; }
+  .hero-desc { max-width: 100%; }
+  .hero-info { min-width: 0; overflow: hidden; }
+
+  /* Кнопки — одинаковые, в ряд */
+.hero-buttons {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  width: 100%;
+  gap: 8px;
+  padding-top: 16px !important;
+}
+  .hero-buttons .twitch-link {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+    font-size: 11px !important;
+    padding: 10px 6px !important;
+    white-space: nowrap;
+  }
+
+  /* Filters */
+  .filters-bar { padding: 12px 16px; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
+  .filters-left { flex-wrap: wrap; gap: 6px; flex: 1; min-width: 0; }
+  .filters-right { flex-shrink: 0; align-self: flex-start; margin-top: 22px; }
+  .filter-chips { gap: 6px; flex-wrap: wrap; }
+  .chip { font-size: 11px; padding: 5px 10px; }
+  .filter-label { font-size: 10px; width: 100%; margin-bottom: 2px; }
+  .filter-sep { display: none; }
+  .sort-select { font-size: 12px; padding: 5px 10px; }
+  .search-mobile { width: 100%; margin-top: 4px; }
+  .search-mobile .search-bar { width: 100%; }
+
+  /* Grid — одна колонка на всю ширину */
+  #videoGrid {
+    grid-template-columns: 1fr !important;
+    padding: 0 16px 16px !important;
+  }
+  .vod-card { border-radius: 12px; }
+  .vod-thumb { height: 200px; }
+
+  /* Section header */
+  .section-header { padding: 16px 16px 12px; }
+  .section-title { font-size: 1.4rem; }
+
+  /* About */
+  .about-section { padding: 24px 16px; }
+  .about-container { padding: 20px 16px; border-radius: 14px; }
+  .about-header { flex-direction: column; gap: 12px; }
+  .about-avatar { width: 56px; height: 56px; }
+  .about-name h2 { font-size: 18px; }
+  .about-cards { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .about-card { padding: 12px; }
+  .about-links { gap: 8px; }
+  .about-link-btn { font-size: 12px; padding: 7px 12px; }
+
+  /* Modals */
+  .player-modal { padding: 12px; border-radius: 12px; }
+  .player-title { font-size: 15px; }
+  .modal-content { padding: 20px 16px; border-radius: 14px; margin: 10px; }
+  .form-row { grid-template-columns: 1fr; }
+  .modal-title { font-size: 18px; }
+  .auth-modal { padding: 24px 16px; border-radius: 14px; margin: 16px; }
+  .auth-title { font-size: 18px; }
+
+  /* Footer */
+  footer { flex-direction: column; gap: 8px; text-align: center; padding: 20px 16px; }
+}
+
+/* Avatar — меньше на мобилке */
+.avatar { width: 100px; height: 100px; }
+
+/* Hero layout — убираем лишний отступ */
+.hero { padding: 24px 16px 24px; }
+  }
+
+  .hero-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  /* Fade-in animation for cards */
+  .vod-card {
+    animation: card-in 0.4s ease both;
+  }
+
+  /* ── AUTH ── */
+  .auth-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .auth-modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
+  }
+  .auth-modal {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 18px;
+    padding: 36px;
+    width: 100%;
+    max-width: 380px;
+    position: relative;
+  }
+  .auth-title {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .auth-sub {
+    font-size: 13px;
+    color: var(--text3);
+    margin-bottom: 24px;
+  }
+  .auth-error {
+    font-size: 12px;
+    color: #f87171;
+    margin-top: 10px;
+    min-height: 16px;
+    font-family: var(--font-mono);
+  }
+  .auth-btn {
+    width: 100%;
+    padding: 11px;
+    background: linear-gradient(135deg, #7c3aed, #db2777);
+    color: #fff;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 14px;
+    transition: opacity 0.2s;
+  }
+  .auth-btn:hover { opacity: 0.9; }
+  .auth-hint {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 14px;
+    line-height: 1.5;
+    font-family: var(--font-mono);
+  }
+
+  /* Admin badge in header */
+  .admin-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid rgba(192,132,252,0.3);
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .admin-badge:hover { background: rgba(192,132,252,0.2); }
+  .admin-badge svg { width: 10px; height: 10px; }
+
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .vod-card:nth-child(1) { animation-delay: 0.05s; }
+  .vod-card:nth-child(2) { animation-delay: 0.10s; }
+  .vod-card:nth-child(3) { animation-delay: 0.15s; }
+  .vod-card:nth-child(4) { animation-delay: 0.20s; }
+  .vod-card:nth-child(5) { animation-delay: 0.25s; }
+  .vod-card:nth-child(6) { animation-delay: 0.30s; }
+  .vod-card:nth-child(7) { animation-delay: 0.35s; }
+  .vod-card:nth-child(8) { animation-delay: 0.40s; }
+  .vod-card:nth-child(9) { animation-delay: 0.45s; }
+ .about-section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 2rem 3rem;
+}
+ 
+.about-container {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 2rem;
+}
+ 
+.about-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 1.5rem;
+}
+ 
+.about-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(192,132,252,0.15);
+  border: 1px solid rgba(192,132,252,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 500;
+  color: #c084fc;
+  flex-shrink: 0;
+}
+ 
+.about-name h2 {
+  margin: 0 0 2px;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text, #f0eef8);
+}
+ 
+.about-name p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text2, #9c98b4);
+}
+ 
+.about-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-style: normal;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.07);
+  color: var(--text2, #9c98b4);
+  margin-left: 6px;
+  vertical-align: middle;
+}
+ 
+.about-bio {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text2, #9c98b4);
+  margin: 0 0 2rem;
+}
+ 
+.about-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 2rem;
+}
+ 
+.about-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+}
+ 
+.about-card-label {
+  font-size: 11px;
+  color: var(--text2, #9c98b4);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+ 
+.about-card-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text, #f0eef8);
+}
+ 
+.about-tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.07);
+  color: var(--text2, #9c98b4);
+  margin: 2px 2px 0 0;
+  font-weight: 400;
+}
+ 
+.about-divider {
+  border-top: 1px solid rgba(255,255,255,0.07);
+  margin: 1.5rem 0;
+}
+ 
+.about-section-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text2, #9c98b4);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+ 
+.about-specs {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 0.25rem 1rem;
+  margin-bottom: 1.5rem;
+}
+ 
+.about-spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+ 
+.about-spec-row:last-child {
+  border-bottom: none;
+}
+ 
+.about-spec-key {
+  font-size: 13px;
+  color: var(--text2, #9c98b4);
+}
+ 
+.about-spec-val {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text, #f0eef8);
+  text-align: right;
+}
+ 
+.about-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+ 
+.about-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text, #f0eef8);
+  text-decoration: none;
+  background: rgba(255,255,255,0.04);
+  transition: background 0.2s;
+}
+ 
+.about-link-btn:hover {
+  background: rgba(255,255,255,0.09);
+}
+ .support-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+  align-self: center;
+}
+.support-btn:hover { background: rgba(255,255,255,0.09); transform: none; }
+.support-btn:active { transform: scale(0.98); }
+.support-btn svg { width: 16px; height: 16px; fill: none; stroke: #d4537e; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+.support-btn:hover { background: rgba(255,255,255,0.09); transform: scale(1.08); }
+.support-btn:active { transform: scale(0.96); }
+.support-btn svg { width: 22px; height: 22px; fill: none; stroke: #d4537e; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+ 
+.support-overlay {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.support-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
+ 
+.support-modal {
+  background: var(--bg2, #111118);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  width: 340px;
+  max-width: 90vw;
+  position: relative;
+  pointer-events: auto;
+}
+ 
+.support-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(255,255,255,0.12);
+  color: var(--text2, #9c98b4);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+}
+.support-modal-close:hover {
+  border-color: var(--pink);
+  background: var(--pink-dim);
+  color: var(--pink);
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: 0 0 0 3px rgba(244,114,182,0.12), 0 0 20px rgba(244,114,182,0.25);
+}
+.support-modal-close:active {
+  transform: rotate(90deg) scale(0.95);
+}
+ 
+.support-modal-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text, #f0eef8);
+  margin: 0 0 4px;
+}
+.support-modal-sub {
+  font-size: 13px;
+  color: var(--text2, #9c98b4);
+  margin: 0 0 1.25rem;
+}
+ 
+.support-da-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  color: var(--text, #f0eef8);
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+}
+.support-da-btn:hover { background: rgba(255,255,255,0.09); }
+ 
+.support-method {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+}
+.support-method-label {
+  font-size: 11px;
+  color: var(--text3, #5e5c72);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+.support-method-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.support-method-val {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text, #f0eef8);
+  word-break: break-all;
+  flex: 1;
+}
+.support-copy-btn {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--text2, #9c98b4);
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.support-copy-btn:hover { background: rgba(255,255,255,0.07); }
+
+  /* === ПЛАВНЫЕ АНИМАЦИИ МОДАЛЬНЫХ ОКОН (без ломки pointer-events) === */
+
+  /* Modal overlay — оригинал использует display:none/flex, мы анимируем через visibility+opacity */
+  .modal-overlay {
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s;
+  }
+  .modal-overlay:not(.open) {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+  }
+  .modal-overlay:not(.open) .modal {
+    transform: scale(0.94) translateY(12px);
+    opacity: 0;
+  }
+  .modal-overlay.open .modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  .modal {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Auth modal */
+  .auth-modal-overlay {
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s;
+  }
+  .auth-modal-overlay:not(.open) {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .auth-modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+  }
+  .auth-modal-overlay:not(.open) .auth-modal {
+    transform: scale(0.94) translateY(12px);
+    opacity: 0;
+  }
+  .auth-modal-overlay.open .auth-modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  .auth-modal {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Support modal */
+  .support-overlay {
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s;
+  }
+  .support-overlay:not(.open) {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .support-overlay.open {
+    opacity: 1;
+    visibility: visible;
+  }
+  .support-overlay:not(.open) .support-modal {
+    transform: scale(0.94) translateY(12px);
+    opacity: 0;
+  }
+  .support-overlay.open .support-modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  .support-modal {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* === УЛУЧШЕННЫЕ СВЕЧЕНИЯ И АНИМАЦИИ === */
+
+  /* Анимированные градиентные шары */
+  .orb {
+    filter: blur(100px);
+    opacity: 0.4;
+  }
+  .orb-1 {
+    width: 700px; height: 700px;
+    top: -250px; left: -150px;
+    background: radial-gradient(circle, #7c3aed 0%, #4c1d95 60%, transparent 100%);
+    animation: orbFloat1 10s ease-in-out infinite;
+  }
+  .orb-2 {
+    width: 500px; height: 500px;
+    bottom: 100px; right: -200px;
+    background: radial-gradient(circle, #db2777 0%, #9d174d 60%, transparent 100%);
+    animation: orbFloat2 12s ease-in-out infinite;
+  }
+  .orb-3 {
+    width: 400px; height: 400px;
+    top: 45%; left: 35%;
+    background: radial-gradient(circle, #4f46e5 0%, #312e81 60%, transparent 100%);
+    opacity: 0.3 !important;
+    animation: orbFloat3 15s ease-in-out infinite;
+  }
+  .orb-4 {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    width: 350px; height: 350px;
+    bottom: -100px; left: 20%;
+    background: radial-gradient(circle, #c084fc 0%, #7c3aed 60%, transparent 100%);
+    opacity: 0.35;
+    animation: orbFloat4 17s ease-in-out infinite;
+  }
+
+  @keyframes orbFloat1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(120px, 80px) scale(1.2); }
+    50% { transform: translate(-60px, 160px) scale(0.9); }
+    75% { transform: translate(80px, -40px) scale(1.15); }
+  }
+  @keyframes orbFloat2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(-100px, -120px) scale(1.3); }
+    50% { transform: translate(60px, -60px) scale(0.85); }
+    75% { transform: translate(-80px, 40px) scale(1.2); }
+  }
+  @keyframes orbFloat3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(80px, -100px) scale(1.25); }
+    66% { transform: translate(-40px, 60px) scale(0.9); }
+  }
+  @keyframes orbFloat4 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-80px, -60px) scale(1.3); }
+    66% { transform: translate(60px, -80px) scale(0.85); }
+  }
+
+  /* === HOVER ДЛЯ LATEST RECORDING КАК У ОБЫЧНЫХ КАРТОЧЕК === */
+  .hero-latest-card {
+    position: relative;
+    transition: border-color 0.3s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  }
+  .hero-latest-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 15px;
+    padding: 1px;
+    background: linear-gradient(135deg, transparent 40%, rgba(192,132,252,0.3) 50%, transparent 60%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .hero-latest-card:hover::before {
+    opacity: 1;
+    animation: borderGlow 2s ease-in-out infinite;
+  }
+  .hero-latest-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(192,132,252,0.08), 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .hero-latest-card:hover .hero-latest-thumb img,
+  .hero-latest-card:hover .hero-latest-thumb .hero-latest-play {
+    transform: scale(1.04);
+  }
+  .hero-latest-thumb img,
+  .hero-latest-thumb .hero-latest-play {
+    transition: transform 0.3s ease;
+  }
+  .hero-latest-card:hover .hero-latest-play {
+    background: rgba(192,132,252,0.3);
+    border-color: var(--accent);
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(192,132,252,0.4);
+  }
+  /* Glow-рамка для latest card при hover */
+  .hero-latest-card::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--pink), var(--accent));
+    background-size: 200% 200%;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
+    filter: blur(8px);
+    animation: gradientShift 3s ease infinite;
+  }
+  .hero-latest-card:hover::after {
+    opacity: 0.4;
+  }
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Светящиеся границы обычных карточек при hover */
+  .vod-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 15px;
+    padding: 1px;
+    background: linear-gradient(135deg, transparent 40%, rgba(192,132,252,0.3) 50%, transparent 60%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .vod-card:hover::before {
+    opacity: 1;
+    animation: borderGlow 2s ease-in-out infinite;
+  }
+  @keyframes borderGlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Пульсирующее свечение для live индикатора */
+  @keyframes livePulse {
+    0%, 100% { box-shadow: 0 0 4px var(--live), 0 0 8px var(--live), 0 0 12px var(--live); }
+    50% { box-shadow: 0 0 8px var(--live), 0 0 16px var(--live), 0 0 24px var(--live); }
+  }
+
+  /* Светящийся аватар */
+  .avatar-ring::before {
+    inset: -4px;
+    background: linear-gradient(135deg, var(--accent), var(--pink), var(--accent));
+    background-size: 200% 200%;
+    animation: avatarGlow 4s ease infinite;
+    filter: blur(3px);
+    opacity: 0.8;
+  }
+  @keyframes avatarGlow {
+    0%, 100% { background-position: 0% 50%; filter: blur(3px) brightness(1); }
+    50% { background-position: 100% 50%; filter: blur(5px) brightness(1.3); }
+  }
+
+  /* Светящийся эффект для кнопок */
+  .upload-btn {
+    position: relative;
+    overflow: hidden;
+  }
+  .upload-btn::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #7c3aed, #db2777, #7c3aed);
+    background-size: 200% 200%;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    filter: blur(6px);
+    animation: gradientShift 3s ease infinite;
+  }
+  .upload-btn:hover::before {
+    opacity: 0.6;
+  }
+
+  /* Светящийся эффект для twitch-link кнопок */
+  .twitch-link {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .twitch-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(145,71,255,0.25);
+  }
+
+  /* Плавные переходы */
+  .chip, .icon-btn, .about-link-btn, .support-da-btn, .support-copy-btn, .modal-close, .support-modal-close {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Улучшенный hover для карточек */
+  .vod-card {
+    transition: border-color 0.3s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  }
+  .vod-card:hover {
+    box-shadow: 0 8px 32px rgba(192,132,252,0.08), 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  /* Плавный скроллбар */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* Плавное появление секций */
+  .hero, .filters-bar, main, .about-section, footer {
+    animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+  .hero { animation-delay: 0.1s; }
+  .filters-bar { animation-delay: 0.2s; }
+  main { animation-delay: 0.3s; }
+  .about-section { animation-delay: 0.4s; }
+  footer { animation-delay: 0.5s; }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* About section glow */
+  .about-container {
+    position: relative;
+    overflow: hidden;
+  }
+  .about-container::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 30%, rgba(192,132,252,0.03) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(219,39,119,0.03) 0%, transparent 50%);
+    animation: aboutGlow 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes aboutGlow {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg); }
+  }
+
+  /* Светящийся эффект для стат-боксов */
+  .hero-stat-box {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .hero-stat-box::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(192,132,252,0.05), transparent);
+    transition: left 0.6s ease;
+  }
+  .hero-stat-box:hover::after {
+    left: 100%;
+  }
+  .hero-stat-box:hover {
+    border-color: var(--border2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(192,132,252,0.06);
+  }
+
+  /* Улучшенный drop zone */
+  .drop-zone {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .drop-zone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(192,132,252,0.08) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .drop-zone:hover::before, .drop-zone.dragover::before {
+    opacity: 1;
+  }
+
+  /* Плавный progress bar */
+  .progress-fill {
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(192,132,252,0.5);
+  }
+
+  /* Светящийся input при фокусе */
+  .form-input:focus {
+    box-shadow: 0 0 0 3px rgba(192,132,252,0.15), 0 0 20px rgba(192,132,252,0.08);
+  }
+
+  /* Улучшенный search bar */
+  .search-bar {
+    transition: all 0.3s ease;
+  }
+  .search-bar:focus-within {
+    box-shadow: 0 0 0 2px rgba(192,132,252,0.2), 0 4px 20px rgba(192,132,252,0.1);
+  }
+
+  /* Плавная анимация для навигации */
+  nav a {
+    position: relative;
+    overflow: hidden;
+  }
+  nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    width: 0; height: 2px;
+    background: var(--accent);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(-50%);
+    border-radius: 1px;
+  }
+  nav a:hover::after, nav a.active::after {
+    width: 60%;
+  }
+
+  /* Светящийся footer */
+  footer {
+    position: relative;
+  }
+  footer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--pink), transparent);
+    opacity: 0.3;
+  }
+
+  /* Улучшенный empty state */
+  .empty-state.show {
+    animation: emptyPulse 3s ease-in-out infinite;
+  }
+  @keyframes emptyPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  /* Светящийся эффект для тегов */
+  .tag-game {
+    transition: all 0.25s ease;
+  }
+  .tag-game:hover {
+    box-shadow: 0 0 8px rgba(192,132,252,0.3);
+    transform: translateY(-1px);
+  }
+
+  /* Плавное появление чата */
+  #chatPanel {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Светящийся play button */
+  .hero-latest-play, .thumb-icon {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Улучшенный load more button */
+  #loadMoreBtn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  #loadMoreBtn::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--pink));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    filter: blur(8px);
+    z-index: -1;
+  }
+  #loadMoreBtn:hover::before {
+    opacity: 0.4;
+  }
+  #loadMoreBtn:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Улучшенный admin badge */
+  .admin-badge {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .admin-badge:hover {
+    box-shadow: 0 0 15px rgba(192,132,252,0.2);
+  }
+
+  /* Светящийся логотип */
+  .logo-mark {
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  .logo-mark::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--pink));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    filter: blur(6px);
+    z-index: -1;
+  }
+  .logo:hover .logo-mark::after {
+    opacity: 0.5;
+  }
+  .logo:hover .logo-mark {
+    transform: scale(1.05);
+  }
+
+  /* Плавный hover для about cards */
+  .about-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .about-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  }
+  .about-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(192,132,252,0.03), transparent);
+    transition: left 0.6s ease;
+  }
+  .about-card:hover::before {
+    left: 100%;
+  }
+
+  /* Светящийся about-link-btn */
+  .about-link-btn {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .about-link-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(192,132,252,0.1);
+    border-color: rgba(192,132,252,0.3);
+  }
+
+  /* Улучшенный support button */
+  .support-btn {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .support-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(212,83,126,0.3);
+  }
+
+  /* Плавное появление сообщений чата */
+  #chatMessages > div {
+    animation: chatMsgIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+  @keyframes chatMsgIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Светящийся эффект для section-header */
+  .section-header {
+    position: relative;
+  }
+  .section-header::after {
+    content: '';
+    position: absolute;
+    bottom: -8px; left: 0;
+    width: 40px; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--pink));
+    border-radius: 1px;
+    opacity: 0.6;
+  }
+
+  /* Улучшенный select */
+  .sort-select {
+    transition: all 0.3s ease;
+  }
+  .sort-select:focus {
+    box-shadow: 0 0 0 2px rgba(192,132,252,0.2);
+  }
+
+  /* Плавный hover для chips */
+  .chip {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(192,132,252,0.08);
+  }
+  .chip.active {
+    box-shadow: 0 0 12px rgba(192,132,252,0.15);
+  }
+
+  /* Мерцающие звезды на фоне */
+  .stars {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: 
+      radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 40px 70px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 50px 160px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 160px 120px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 200px 50px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 230px 180px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 280px 90px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 320px 150px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 360px 60px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 400px 200px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 450px 100px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 500px 170px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 550px 40px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 600px 130px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 650px 80px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 700px 190px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(1px 1px at 750px 50px, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 800px 140px, rgba(255,255,255,0.1), transparent);
+    animation: twinkle 4s ease-in-out infinite alternate;
+  }
+  @keyframes twinkle {
+    0% { opacity: 0.3; }
+    100% { opacity: 0.8; }
+  }
+
+  /* Плавная анимация для счетчиков */
+  .stat-num {
+    transition: all 0.3s ease;
+  }
+
+  /* Улучшенный player modal */
+  #playerContainer {
+    box-shadow: 0 0 60px rgba(0,0,0,0.5), 0 0 100px rgba(192,132,252,0.03);
+  }
+
+  /* Светящийся close button */
+  .modal-close, .support-modal-close {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .modal-close:hover, .support-modal-close:hover {
+    transform: rotate(90deg);
+    box-shadow: 0 0 15px rgba(244,114,182,0.3);
+  }
+
+  /* Плавный hover для icon-btn */
+  .icon-btn {
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .icon-btn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(192,132,252,0.15);
+  }
+
+  /* Светящийся эффект для form-submit */
+  .form-submit {
+    position: relative;
+    overflow: hidden;
+  }
+  .form-submit::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .form-submit:hover::after {
+    opacity: 1;
+  }
+  .form-submit:hover {
+    box-shadow: 0 8px 30px rgba(124,58,237,0.3);
+  }
+
+  /* Улучшенный auth button */
+  .auth-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .auth-btn:first-of-type:hover {
+    box-shadow: 0 8px 25px rgba(124,58,237,0.25);
+  }
+
+  /* Плавный hover для footer links */
+  footer a {
+    transition: all 0.25s ease;
+    position: relative;
+  }
+  footer a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0;
+    width: 0; height: 1px;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+  footer a:hover::after {
+    width: 100%;
+  }
+
+  /* Улучшенный about-avatar */
+  .about-avatar {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .about-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(192,132,252,0.2);
+  }
+
+  /* Светящийся эффект для about-specs */
+  .about-specs {
+    position: relative;
+    overflow: hidden;
+  }
+  .about-specs::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(192,132,252,0.02), transparent);
+    transition: left 1s ease;
+  }
+  .about-specs:hover::before {
+    left: 100%;
+  }
+
+  /* Плавный hover для support-method */
+  .support-method {
+    transition: all 0.3s ease;
+  }
+  .support-method:hover {
+    border-color: rgba(255,255,255,0.15);
+    transform: translateY(-1px);
+  }
+
+  /* Светящийся copy button */
+  .support-copy-btn {
+    transition: all 0.25s ease;
+  }
+  .support-copy-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 10px rgba(192,132,252,0.15);
+  }
+
+  /* Плавный hover для support-da-btn */
+  .support-da-btn {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .support-da-btn::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #7c3aed, #db2777);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    filter: blur(8px);
+    z-index: -1;
+  }
+  .support-da-btn:hover::before {
+    opacity: 0.4;
+  }
+  .support-da-btn:hover {
+    transform: translateY(-2px);
+    border-color: rgba(192,132,252,0.3);
+  }
+
+  /* Улучшенный noise overlay */
+  body::before {
+    opacity: 0.4;
+    animation: noise 8s steps(10) infinite;
+  }
+  @keyframes noise {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-2%, -2%); }
+    20% { transform: translate(2%, 2%); }
+    30% { transform: translate(-1%, 1%); }
+    40% { transform: translate(1%, -1%); }
+    50% { transform: translate(-2%, 2%); }
+    60% { transform: translate(2%, -2%); }
+    70% { transform: translate(-1%, -1%); }
+    80% { transform: translate(1%, 1%); }
+    90% { transform: translate(-2%, -1%); }
+  }
+
+  
+  /* Search desktop/mobile visibility */
+  .search-desktop { display: flex; align-items: center; }
+  .search-mobile { display: none; width: 100%; }
+  .search-mobile .search-bar { width: 100%; }
+  .search-mobile .search-bar input { width: 100%; display: block !important; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .orb { display: none; }
+    .stars { display: none; }
+    .vod-card::before, .hero-latest-card::before { display: none; }
+  }
+
+
+
+/* ═══ ИНТЕРАКТИВНЫЕ ЧАСТИЦЫ ═══ */
+#particleCanvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.6;
+}
+/* ═══ /ИНТЕРАКТИВНЫЕ ЧАСТИЦЫ ═══ */
+
+</style>
+<base target="_blank">
+<base target="_blank">
+<base target="_blank">
 </head>
 <body>
-  <canvas id="particleCanvas"></canvas>
-  <div class="stars"></div>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-  <div class="orb orb-4"></div>
+<canvas id="particleCanvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.6;"></canvas>
 
-  <!-- HEADER -->
-  <header>
-    <div class="header-inner">
-      <a href="#" class="logo">
-        <div class="logo-mark">
-          <img src="https://i.imgur.com/rNexn9C.jpeg" alt="logo">
-        </div>
-        <span class="logo-text">cutie<span>rover</span></span>
-      </a>
-      <nav>
-        <a href="#" class="active">vods</a>
-        <a href="#about">about streamer</a>
-      </nav>
+
+<div class="stars"></div>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="orb orb-4"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo">
+     <div class="logo-mark" style="padding:0;overflow:hidden;border-radius:8px;"><img src="https://i.imgur.com/rNexn9C.jpeg" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+      <span class="logo-text">cutie<span>rover</span></span>
+    </a>
+
+    <nav>
+      <a href="#" class="active">vods</a>
+      <a href="#about" class="nav-link">about streamer</a>
+    </nav>
+
       <div class="header-right">
         <div class="search-desktop">
-          <div class="search-bar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input type="text" id="searchInput" placeholder="search vods…">
-          </div>
+        <div class="search-bar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="searchInput" placeholder="search vods…" oninput="filterCards()">
         </div>
-        <button class="upload-btn" id="uploadBtn" style="display:none">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
+      </div>
+        <button class="upload-btn" id="uploadBtn" onclick="openModal()" style="display:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           upload recording
         </button>
-        <span class="admin-badge" id="adminBadge" style="display:none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="8" r="4"/>
-            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-          </svg>
+        <span class="admin-badge" id="adminBadge" style="display:none" onclick="logoutAdmin()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
           admin · logout
         </span>
-        <button class="upload-btn" id="loginBtn" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:12px;padding:7px 14px;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="11" width="18" height="11" rx="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
+        <button class="upload-btn" id="loginBtn" onclick="openAuthModal()" style="background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); font-size:12px; padding: 7px 14px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           admin
         </button>
       </div>
-    </div>
-  </header>
+  </div>
+</header>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-layout">
-      <div class="hero-profile">
-        <div class="avatar-ring">
-          <div class="avatar">
-            <img src="https://i.imgur.com/wPoHiLZ.jpeg" alt="cutierover" id="avatarImg">
-            <span id="avatarFallback">✦</span>
-          </div>
-        </div>
-        <div class="hero-info">
-          <div class="streamer-tag">stream archive</div>
-          <h1>cutie<<em>rover</em></h1>
-          <p class="hero-desc">Все записи стримов в одном месте. Смотри то, что пропустил, в лучшем качестве.</p>
-          <div class="hero-stats">
-            <div class="stat">
-              <span class="stat-num" id="statVods">0</span>
-              <span class="stat-label">recordings</span>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat">
-              <span class="stat-num" id="statViews">0</span>
-              <span class="stat-label">views</span>
-            </div>
-          </div>
-          <div class="hero-buttons">
-            <a href="https://twitch.tv/cutierover" class="twitch-link">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
-              </svg>
-              watch live on twitch
-            </a>
-            <a href="https://t.me/cutievods" class="twitch-link telegram-link">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.942z"/>
-              </svg>
-              VODs in telegram
-            </a>
-            <button class="twitch-link support-link" onclick="document.getElementById('supportOverlay').classList.add('open')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="hero-right" id="heroRight" style="display:none">
-        <!-- Latest recording card -->
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-layout">
+  <div class="hero-profile" style="margin-bottom:0;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;min-width:0;overflow:visible;width:100%;">
+    <div class="avatar-ring" style="flex-shrink:0;">
+      <div class="avatar">
+        <img src="data:image/jpeg;base64,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" alt="cutierover" id="avatarImg" style="display:block">
+        <span id="avatarFallback" style="display:none">✦</span>
       </div>
     </div>
-  </section>
+    <div class="hero-info" style="min-width:0;overflow:hidden;">
+      <div class="streamer-tag">stream archive</div>
+      <h1>cutie<em>rover</em></h1>
+      <p class="hero-desc">Все записи стримов в одном месте. Смотри то, что пропустил, в лучшем качестве.</p>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-num" id="statVods">0</span>
+          <span class="stat-label">recordings</span>
+        </div>
+       <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-num" id="statViews">0</span>
+          <span class="stat-label">views</span>
+        </div>
+      </div>
+      <div class="hero-buttons" style="padding-top:24px;display:flex;flex-wrap:nowrap;gap:8px;align-items:center;">
+        <a href="https://twitch.tv/cutierover" target="_blank" class="twitch-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
+          watch live on twitch
+        </a>
+        <a href="https://t.me/cutievods" target="_blank" class="twitch-link" style="background:rgba(0,136,204,0.15);border-color:rgba(0,136,204,0.3);color:#60b8e0;" onmouseover="this.style.background='rgba(0,136,204,0.3)'" onmouseout="this.style.background='rgba(0,136,204,0.15)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.942z"/></svg>
+          VODs in telegram
+        </a>
+        <button class="twitch-link" onclick="document.getElementById('supportOverlay').classList.add('open')" style="background:rgba(212,83,126,0.15);border-color:rgba(212,83,126,0.3);color:#e8789f;cursor:pointer;font-family:var(--font-sans);font-size:13px;font-weight:500;" onmouseover="this.style.background='rgba(212,83,126,0.28)'" onmouseout="this.style.background='rgba(212,83,126,0.15)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
 
-  <!-- FILTERS -->
-  <div class="filters-bar">
-    <div class="filters-left">
-      <span class="filter-label">filter</span>
-      <div class="filter-chips">
-        <span class="chip active" data-tag="all">all</span>
-        <span class="chip" data-tag="gaming">gaming</span>
-        <span class="chip" data-tag="film">film</span>
-        <span class="chip" data-tag="irl">irl</span>
-        <span class="chip" data-tag="just chatting">just chatting</span>
-      </div>
-      <div class="search-mobile">
-        <div class="search-bar">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="m21 21-4.35-4.35"/>
-          </svg>
-          <input type="text" id="searchInputMobile" placeholder="search vods…">
-        </div>
       </div>
     </div>
-    <div class="filters-right">
-      <div class="filter-sep"></div>
-      <select class="sort-select" id="sortSelect">
-        <option value="newest">newest first</option>
-        <option value="oldest">oldest first</option>
-        <option value="views">most viewed</option>
-      </select>
+
     </div>
   </div>
-
-  <!-- MAIN GRID -->
-  <main>
-    <div class="section-header">
-      <h2 class="section-title">all recordings</h2>
-      <span class="section-count" id="countBadge">0 vods</span>
+  <!-- RIGHT COLUMN -->
+  <div class="hero-right" id="heroRight" style="display:none">
+    <div class="hero-latest-label">latest recording</div>
+    <div class="hero-latest-card" id="heroLatestCard">
+      <div class="hero-latest-thumb" id="heroLatestThumb">
+        <div class="hero-latest-play">
+          <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        </div>
+        <span class="hero-latest-dur" id="heroLatestDur"></span>
+      </div>
+      <div class="hero-latest-body">
+        <div class="hero-latest-title" id="heroLatestTitle">—</div>
+        <div class="hero-latest-meta" id="heroLatestMeta"></div>
+      </div>
     </div>
-    <div class="video-grid" id="videoGrid">
-      <div class="empty-state" id="emptyState">
-        <div class="empty-icon">📼</div>
-        <div class="empty-title">no recordings yet</div>
-        <div class="empty-sub">upload the first one using the button above</div>
-      </div>
-    </div>
-  </main>
-
-  <!-- ABOUT -->
-  <hr class="section-divider">
-  <section id="about" class="about-section">
-    <!-- About content -->
-  </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <span>© 2025 cutierover - stream archive</span>
-    <span>built by <a href="https://twitch.tv/voicecoretm">voicecoretm</a> and <a href="https://twitch.tv/ra9dinss">ra9dinss</a></span>
-    <a href="https://twitch.tv/cutierover">Twitch ↗</a>
-  </footer>
-
-  <!-- MODALS -->
-  <!-- Player Modal -->
-  <div class="modal-overlay" id="playerOverlay">
-    <div class="modal player-modal">
-      <button class="modal-close" onclick="closePlayer()">×</button>
-      <h2 class="modal-title" id="playerTitle"></h2>
-      <div id="playerContainer">
-        <div class="player-video">
-          <video id="videoPlayer" controls preload="metadata"></video>
-          <iframe id="iframePlayer" allowfullscreen allow="autoplay"></iframe>
-          <div id="playerMsg"></div>
+    <div class="hero-stats-grid">
+      <div class="hero-stat-box" id="twitchStatusBox" style="cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;" onclick="window.open('https://twitch.tv/cutierover','_blank')">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span id="liveIndicator" style="width:8px;height:8px;border-radius:50%;background:#f87171;box-shadow:0 0 6px #f87171;flex-shrink:0;display:block"></span>
+          <div class="stat-label" style="margin:0" id="liveLabel">offline</div>
         </div>
-        <div id="chatPanel">
-          <div class="chat-header">
-            <span>chat replay</span>
-            <span id="chatCount"></span>
-          </div>
-          <div id="chatMessages"></div>
+        <div>
+          <div class="stat-num" id="statFollowers">—</div>
+          <div class="stat-label">followers</div>
         </div>
       </div>
-      <div id="playerMeta"></div>
-    </div>
-  </div>
-
-  <!-- Auth Modal -->
-  <div class="auth-modal-overlay" id="authOverlay">
-    <div class="auth-modal">
-      <div class="auth-title">admin login</div>
-      <div class="auth-sub" id="authSubText">enter your credentials</div>
-      <input type="email" class="form-input" id="authEmail" placeholder="email">
-      <input type="password" class="form-input" id="authPassword" placeholder="password">
-      <div class="auth-error" id="authError"></div>
-      <button class="auth-btn" onclick="submitAuth()">sign in</button>
-      <button class="auth-btn auth-btn-secondary" onclick="closeAuthModal()">cancel</button>
-    </div>
-  </div>
-
-  <!-- Upload Modal -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
-      <button class="modal-close" onclick="closeModal()">×</button>
-      <h2 class="modal-title" id="modalTitle">upload recording</h2>
-      <p class="modal-sub">Add a new stream VOD to the archive.</p>
-      
-      <div class="form-group">
-        <label class="form-label">duration</label>
-        <div class="duration-inputs">
-          <input type="number" class="form-input" id="vodDurH" placeholder="h" min="0">
-          <input type="number" class="form-input" id="vodDurM" placeholder="m" min="0" max="59">
-          <input type="number" class="form-input" id="vodDurS" placeholder="s" min="0" max="59">
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label class="form-label">stream title</label>
-        <input type="text" class="form-input" id="vodTitle" placeholder="e.g. cozy minecraft stream ✦">
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">date</label>
-          <input type="date" class="form-input" id="vodDate">
-        </div>
-        <div class="form-group">
-          <label class="form-label">category</label>
-          <select class="form-input" id="vodCategory">
-            <option value="gaming">gaming</option>
-            <option value="just chatting">just chatting</option>
-            <option value="irl">irl</option>
-            <option value="film">film</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">game / tags</label>
-        <input type="text" class="form-input" id="vodTags" placeholder="e.g. minecraft, chill, 100 days">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">upload to archive.org</label>
-        <div class="drop-zone" id="dropZone">
-          <input type="file" id="fileInput" accept="video/*" style="display:none">
-          <div class="drop-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="17 8 12 3 7 8"/>
-              <line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-          </div>
-          <div class="drop-text" id="dropText"><strong>click to upload</strong> or drag & drop</div>
-          <div class="drop-sub" id="dropSub">mp4, webm, mkv — any size</div>
-        </div>
-        <div class="upload-progress" id="uploadProgress">
-          <div class="progress-label">
-            <span id="progressText">uploading…</span>
-            <span id="progressPct">0%</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
-          </div>
-        </div>
-        <label class="checkbox-label">
-          <input type="checkbox" id="autoPublish" checked>
-          <span>auto-publish after upload</span>
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">or paste link</label>
-        <input type="text" class="form-input" id="vodUrl" placeholder="https://archive.org/download/...">
-      </div>
-      
-      <div class="form-group">
-        <label class="form-label">chat json <span class="label-hint">(ссылка на JSON чата)</span></label>
-        <input type="text" class="form-input" id="vodChat" placeholder="https://raw.githubusercontent.com/...">
-      </div>
-      
-      <div class="form-group">
-        <label class="form-label">thumbnail <span class="label-hint">(необязательно)</span></label>
-        <input type="text" class="form-input" id="vodThumbnail" placeholder="https://i.imgur.com/...">
-      </div>
-      
-      <button class="form-submit" id="submitBtn" onclick="submitVod()">publish recording</button>
-    </div>
-  </div>
-
-  <!-- Support Modal -->
-  <div class="support-overlay" id="supportOverlay">
-    <div class="support-modal">
-      <button class="support-modal-close" onclick="closeSupport()">×</button>
-      <p class="support-modal-title">Поддержать создателя сайта ♡</p>
-      <p class="support-modal-sub">Выбери удобный способ</p>
-      <a class="support-da-btn" href="https://www.donationalerts.com/r/voicecoretm" target="_blank">donation alerts</a>
-      <div class="support-method">
-        <div class="support-method-label">USDT TRC-20</div>
-        <div class="support-method-row">
-          <span class="support-method-val">TS9YcNXxWcJ5tMU8KRm2t8GvvHdv1FiorG</span>
-          <button class="support-copy-btn" onclick="copyToClipboard(this, 'TS9YcNXxWcJ5tMU8KRm2t8GvvHdv1FiorG')">копировать</button>
+      <div class="hero-stat-box" style="cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;" onclick="window.open('https://twitch.tv/cutierover','_blank')">
+        <div class="stat-label">viewers now</div>
+        <div>
+          <div class="stat-num" id="statViewers">—</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Intro -->
-  <div id="intro">
-    <div class="intro-orb orb-1"></div>
-    <div class="intro-orb orb-2"></div>
-    <div class="intro-orb orb-3"></div>
-    <div class="intro-content">
-      <div class="intro-logo">
-        <div class="intro-logo-mark">✦</div>
+  </div><!-- end hero-layout -->
+</section>
+
+<!-- FILTERS -->
+<div class="filters-bar">
+  <div class="filters-left">
+    <span class="filter-label">filter</span>
+    <div class="filter-chips">
+      <span class="chip active" onclick="filterByTag('all', this)">all</span>
+      <span class="chip" onclick="filterByTag('gaming', this)">gaming</span>
+      <span class="chip" onclick="filterByTag('film', this)">film</span>
+      <span class="chip" onclick="filterByTag('irl', this)">irl</span>
+      <span class="chip" onclick="filterByTag('just chatting', this)">just chatting</span>
+    </div>
+    <div class="search-mobile">
+      <div class="search-bar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInputMobile" placeholder="search vods…" oninput="filterCards()">
       </div>
-      <div class="intro-title">
-        <span>c</span><span>u</span><span>t</span><span>i</span><span>e</span><span>r</span><span>o</span><span>v</span><span>e</span><span>r</span>
-      </div>
-      <div class="intro-subtitle">stream archive</div>
-      <div class="intro-line"></div>
     </div>
   </div>
+  <div class="filters-right">
+    <div class="filter-sep"></div>
+    <select class="sort-select" onchange="sortCards(this.value)">
+      <option value="newest">newest first</option>
+      <option value="oldest">oldest first</option>
+      <option value="views">most viewed</option>
+    </select>
+  </div>
+</div>
 
-  <script src="app.js"></script>
+<!-- MAIN GRID -->
+<main>
+  <div class="section-header">
+    <h2 class="section-title">all recordings</h2>
+    <span class="section-count" id="countBadge">0 vods</span>
+  </div>
+
+  <div class="video-grid" id="videoGrid">
+    <!-- Cards injected by JS -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">📼</div>
+      <div class="empty-title">no recordings yet</div>
+      <div class="empty-sub">upload the first one using the button above</div>
+    </div>
+  </div>
+</main>
+ <hr style="border:none; border-top: 1px solid rgba(255,255,255,0.07); max-width:1280px; margin: 0 auto;">
+ <section id="about" class="about-section">
+  <div class="about-container">
+ 
+    <div class="about-header">
+      <div class="about-avatar"><img src="https://i.imgur.com/wPoHiLZ.jpeg" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
+      <div class="about-name">
+        <h2>cutie<em>rover</em> <span class="about-badge">Katherine</span></h2>
+        <p>Екатерина Репьёва · стримерша на Twitch</p>
+      </div>
+    </div>
+ 
+    <p class="about-bio">
+      Русскоязычная стримерша с аудиторией более 220 тысяч подписчиков.
+      В прошлом выступала за женский состав <strong>Virtus.pro</strong> в игре <strong>CS:GO</strong>,
+      где запомнилась как сильный снайпер. В эфирах - уютная атмосфера,
+      просмотры фильмов, прохождение сюжеток и IRL-контент.
+    </p>
+ 
+    <div class="about-cards">
+      <div class="about-card">
+        <div class="about-card-label">Подписчики</div>
+        <div class="about-card-value">220 000+</div>
+      </div>
+      <div class="about-card">
+        <div class="about-card-label">Категории</div>
+        <div class="about-card-value">
+          <span class="about-tag">Just Chatting</span>
+          <span class="about-tag">Gaming</span>
+          <span class="about-tag">IRL</span>
+          <span class="about-tag">Film</span>
+        </div>
+      </div>
+      <div class="about-card">
+        <div class="about-card-label">Киберспорт</div>
+        <div class="about-card-value">Virtus.pro</div>
+      </div>
+      <div class="about-card">
+        <div class="about-card-label">IRL-контент</div>
+        <div class="about-card-value">Сочи, буткемпы, поездки</div>
+      </div>
+    </div>
+ 
+    <div class="about-divider"></div>
+ 
+    <div class="about-section-label">Сетап</div>
+    <div class="about-specs">
+      <div class="about-spec-row">
+        <span class="about-spec-key">Процессор</span>
+        <span class="about-spec-val">Ryzen 7 7800X3D</span>
+      </div>
+      <div class="about-spec-row">
+        <span class="about-spec-key">Видеокарта</span>
+        <span class="about-spec-val">GIGABYTE RTX 4070 SUPER</span>
+      </div>
+      <div class="about-spec-row">
+        <span class="about-spec-key">Мышка</span>
+        <span class="about-spec-val">WLMOUSE Sword X</span>
+      </div>
+      <div class="about-spec-row">
+        <span class="about-spec-key">Наушники</span>
+        <span class="about-spec-val">Logitech PRO X 2</span>
+      </div>
+      <div class="about-spec-row">
+        <span class="about-spec-key">Клавиатура</span>
+        <span class="about-spec-val">Cidoo QK61</span>
+      </div>
+      <div class="about-spec-row">
+        <span class="about-spec-key">Монитор</span>
+        <span class="about-spec-val">Samsung Odyssey 500Hz</span>
+      </div>
+      <div class="about-spec-row">
+        <span class="about-spec-key">Микрофон</span>
+        <span class="about-spec-val">Neumann TLM 103</span>
+      </div>
+      <div class="about-spec-row">
+        <span class="about-spec-key">Камера</span>
+        <span class="about-spec-val">Sony ZV-E10 II + Tamron 11-20mm</span>
+      </div>
+    </div>
+ 
+    <div class="about-divider"></div>
+ 
+    <div class="about-section-label">Найти в сети</div>
+    <div class="about-links">
+      <a href="https://twitch.tv/cutierover" target="_blank" class="about-link-btn">Twitch</a>
+      <a href="https://instagram.com/ne.cutierover" target="_blank" class="about-link-btn">Instagram</a>
+      <a href="https://t.me/cutierover" target="_blank" class="about-link-btn">Telegram</a>
+      <a href="https://t.me/ctrvr" target="_blank" class="about-link-btn">Spam tg</a>
+      <a href="https://www.hltv.org/player/22026/katherine" target="_blank" class="about-link-btn">HLTV</a>
+      <a href="https://www.tiktok.com/@ne.cutierover?is_from_webapp=1&sender_device=pc" target="_blank" class="about-link-btn">TikTok</a>
+      <a href="https://www.twitch.tv/ne_cutierover" target="_blank" class="about-link-btn">Second Twitch</a>
+      <a href="https://steamcommunity.com/id/cutierover" target="_blank" class="about-link-btn">Steam</a>
+    </div>
+ 
+  </div>
+</section>
+<!-- FOOTER -->
+<footer style="border-top: 1px solid var(--border);">
+  <span>© 2025 cutierover - stream archive</span>
+  <span>built by <a href="https://twitch.tv/voicecoretm">voicecoretm</a> and <a href="https://twitch.tv/ra9dinss">ra9dinss</a></span>
+  <a href="https://twitch.tv/cutierover" target="_blank">Twitch ↗</a>
+</footer>
+
+<!-- VIDEO PLAYER MODAL -->
+<div class="modal-overlay" id="playerOverlay" onclick="handlePlayerOverlayClick(event)">
+  <div class="modal" style="max-width:1400px;padding:20px;width:95vw;">
+    <button class="modal-close player-x" onclick="closePlayer()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <h2 class="modal-title" id="playerTitle" style="margin-bottom:16px;font-size:18px;padding-right:32px;"></h2>
+    <div id="playerContainer" style="width:100%;display:flex;gap:0;border-radius:10px;overflow:hidden;background:#000;height:60vh;">
+      <div style="flex:1;min-width:0;position:relative;display:flex;align-items:center;justify-content:center;">
+        <video id="videoPlayer" controls style="width:100%;height:100%;display:none;" preload="metadata"></video>
+        <iframe id="iframePlayer" style="width:100%;height:100%;border:none;display:none;" allowfullscreen allow="autoplay"></iframe>
+        <div id="playerMsg" style="color:var(--text2);font-size:14px;text-align:center;padding:20px;display:none;"></div>
+      </div>
+      <div id="chatPanel" style="display:none;width:320px;flex-shrink:0;border-left:1px solid var(--border);background:#0e0e10;flex-direction:column;">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+          <span style="font-family:var(--font-mono);font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">chat replay</span>
+          <span id="chatCount" style="font-family:var(--font-mono);font-size:10px;color:var(--text3);margin-left:auto;"></span>
+        </div>
+        <div id="chatMessages" style="flex:1;overflow-y:auto;padding:8px 0;scroll-behavior:smooth;"></div>
+      </div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;" id="playerMeta"></div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="auth-modal-overlay" id="authOverlay">
+  <div class="auth-modal">
+    <div class="auth-title">admin login</div>
+    <div class="auth-sub" id="authSubText">enter your credentials</div>
+    <input type="email" class="form-input" id="authEmail" placeholder="email" style="width:100%;margin-bottom:10px" onkeydown="if(event.key==='Enter')submitAuth()">
+    <input type="password" class="form-input" id="authPassword" placeholder="password" style="width:100%" onkeydown="if(event.key==='Enter')submitAuth()">
+    <div class="auth-error" id="authError"></div>
+    <button class="auth-btn" onclick="submitAuth()">sign in</button>
+    <button class="auth-btn" onclick="closeAuthModal()" style="background:var(--bg4);margin-top:8px;">cancel</button>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <h2 class="modal-title">upload recording</h2>
+    <p class="modal-sub">Add a new stream VOD to the archive. Fill in the details below.</p>
+   
+    <div class="form-group">
+      <label class="form-label">duration</label>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+  <input type="number" class="form-input" id="vodDurH" placeholder="h" min="0">
+  <input type="number" class="form-input" id="vodDurM" placeholder="m" min="0" max="59">
+  <input type="number" class="form-input" id="vodDurS" placeholder="s" min="0" max="59">
+</div>
+    </div>
+   
+    <div class="form-group">
+      <label class="form-label">stream title</label>
+      <input type="text" class="form-input" id="vodTitle" placeholder="e.g. cozy minecraft stream ✦">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">date</label>
+        <input type="date" class="form-input" id="vodDate">
+      </div>
+      <div class="form-group">
+        <label class="form-label">category</label>
+        <select class="form-input" id="vodCategory">
+          <option value="gaming">gaming</option>
+          <option value="just chatting">just chatting</option>
+          <option value="irl">irl</option>
+          <option value="film">film</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">game / tags (comma separated)</label>
+      <input type="text" class="form-input" id="vodTags" placeholder="e.g. minecraft, chill, 100 days">
+    </div>
+
+    <!-- FILE UPLOAD TO ARCHIVE.ORG -->
+    <div class="form-group">
+      <label class="form-label">upload to archive.org</label>
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave()" ondrop="handleDrop(event)">
+        <input type="file" id="fileInput" accept="video/mp4,video/webm,video/mkv" style="display:none" onchange="handleFileSelect(event)">
+        <div class="drop-icon" id="dropIcon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="drop-text" id="dropText"><strong>click to upload</strong> or drag & drop</div>
+        <div class="drop-sub" id="dropSub">mp4, webm, mkv — any size</div>
+      </div>
+      <div class="upload-progress" id="uploadProgress" style="margin-top:12px;">
+        <div class="progress-label">
+          <span id="progressText">uploading to archive.org…</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+      <label class="auto-publish-label" style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;">
+        <input type="checkbox" id="autoPublish" checked style="accent-color:var(--accent);width:14px;height:14px;">
+        <span style="font-size:12px;color:var(--text2);">auto-publish after upload</span>
+      </label>
+    </div>
+
+    <div class="form-group" style="margin-top:8px;">
+      <label class="form-label" style="font-size:11px;color:var(--text3);">or paste link if already uploaded</label>
+      <input type="text" class="form-input" id="vodUrl" placeholder="https://archive.org/download/...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">chat json <span style="color:var(--text3);font-size:10px;text-transform:none;letter-spacing:0">(ссылка на JSON чата с GitHub)</span></label>
+      <input type="text" class="form-input" id="vodChat" placeholder="https://raw.githubusercontent.com/...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">thumbnail <span style="color:var(--text3);font-size:10px;text-transform:none;letter-spacing:0">(необязательно — ссылка на картинку)</span></label>
+      <input type="text" class="form-input" id="vodThumbnail" placeholder="https://i.imgur.com/... или ссылка из Discord">
+    </div>
+    <button class="form-submit" onclick="submitVod()">publish recording</button>
+
+    <div class="upload-progress" id="uploadProgress">
+      <div class="progress-label">
+        <span id="progressText">uploading…</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── SUPABASE CONFIG ──────────────────────────────────────
+// Замени эти два значения своими из Supabase → Project Settings → API
+const SUPABASE_URL = 'https://xlthawdoooosskuluumy.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhsdGhhd2Rvb29vc3NrdWx1dW15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTgxNDcsImV4cCI6MjA5NDgzNDE0N30.qKR9VApdkJfQxJliRJVE4p8bvIrvDTT06Q4EFvnEtsM';
+
+async function sbFetch(path, options = {}) {
+  const token = (supabaseSession && supabaseSession.access_token) ? supabaseSession.access_token : SUPABASE_KEY;
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + token,
+      'Content-Type': 'application/json',
+      'Prefer': options.prefer || 'return=representation',
+      ...options.headers
+    },
+    method: options.method || 'GET',
+    body: options.body ? JSON.stringify(options.body) : undefined
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function loadVods() {
+  try {
+    const data = await sbFetch('vods?order=date.desc,id.desc');
+    return data || [];
+  } catch (e) {
+    console.error('Ошибка загрузки:', e);
+    return [];
+  }
+}
+
+async function insertVod(vod) {
+  return sbFetch('vods', { method: 'POST', body: vod });
+}
+
+async function deleteVodDb(id) {
+  return sbFetch('vods?id=eq.' + id, { method: 'DELETE', prefer: '' });
+}
+
+async function incrementViews(id, currentViews) {
+  return sbFetch('vods?id=eq.' + id, {
+    method: 'PATCH',
+    body: { views: currentViews + 1 },
+    prefer: ''
+  });
+}
+
+let vods = [];
+let currentFilter = 'all';
+let currentSort = 'newest';
+let searchQuery = '';
+let visibleCount = 3;
+
+
+// ─── RENDER ───────────────────────────────────────────────
+function formatDuration(seconds) {
+  if (!seconds) return '—';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return h > 0 
+    ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+    : `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function formatViews(n) {
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+  return String(n);
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.floor(days/7)}w ago`;
+  if (days < 365) return `${Math.floor(days/30)}mo ago`;
+  return `${Math.floor(days/365)}y ago`;
+}
+
+function makeCard(vod, idx) {
+  const isNew = (Date.now() - new Date(vod.date).getTime()) < 86400000 * 3;
+  const tags = (vod.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+
+  const badge = isNew
+    ? `<span class="vod-badge badge-new">new</span>`
+    : '';
+
+  const tagHtml = [
+    vod.category ? `<span class="tag tag-game" onclick="event.stopPropagation();filterByTagName('${vod.category}')" style="cursor:pointer">${vod.category}</span>` : '',
+    ...tags.slice(0,2).map(t => `<span class="tag" onclick="event.stopPropagation();filterByTagName('${t.toLowerCase()}')" style="cursor:pointer">${t}</span>`)
+  ].join('');
+
+  // Цвета заглушки по категории
+  const categoryColors = {
+    'gaming':       ['#1a0a2e', '#2d1060', '#7c3aed'],
+    'just chatting':['#0a1a2e', '#102040', '#3b82f6'],
+    'irl':          ['#1a0a1a', '#2d1040', '#db2777'],
+    'variety':      ['#0a1a0a', '#102010', '#16a34a'],
+  };
+  const colors = categoryColors[(vod.category||'').toLowerCase()] || ['#0f0818', '#1a1025', '#7c3aed'];
+  const initials = (vod.title || '?').split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase();
+
+  const thumbInner = vod.thumbnail
+    ? `<img src="${vod.thumbnail}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+    + `<div class="vod-thumb-inner" style="display:none;background:linear-gradient(135deg,${colors[0]} 0%,${colors[1]} 60%,${colors[2]}22 100%);"><div class="thumb-pattern"></div><div style="font-family:var(--font-serif);font-size:28px;color:${colors[2]};opacity:0.6;z-index:1">${initials}</div></div>`
+    : `<div class="vod-thumb-inner" style="background:linear-gradient(135deg,${colors[0]} 0%,${colors[1]} 60%,${colors[2]}22 100%);">
+        <div class="thumb-pattern"></div>
+        <div style="font-family:var(--font-serif);font-size:28px;color:${colors[2]};opacity:0.6;z-index:1">${initials}</div>
+       </div>`;
+
+  return `
+  <div class="vod-card" data-id="${vod.id}" data-category="${vod.category || ''}" data-date="${vod.date || ''}" data-views="${vod.views || 0}" data-duration="${vod.duration || 0}" data-title="${(vod.title || '').toLowerCase()}" style="animation-delay:${idx * 0.05}s">
+    <div class="vod-thumb">
+      ${thumbInner}
+      ${badge}
+      <span class="vod-duration">${formatDuration(vod.duration)}</span>
+    </div>
+    <div class="vod-body">
+      <div class="vod-title">${vod.title || 'untitled stream'}</div>
+      <div class="vod-meta">
+        <span>${timeAgo(vod.date)}</span>
+        ${vod.date ? `<span class="vod-meta-dot"></span><span>${formatDate(vod.date)}</span>` : ''}
+      </div>
+      ${tagHtml ? `<div class="vod-tags">${tagHtml}</div>` : ''}
+      <div class="vod-footer">
+        <div class="vod-views">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          ${formatViews(vod.views || 0)} views
+        </div>
+        <div class="vod-actions" id="admin-actions-${vod.id}" style="display:${isAdmin?'flex':'none'}">
+          <button class="icon-btn" title="open" onclick="event.stopPropagation();openVod('${vod.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </button>
+          <button class="icon-btn" title="edit" onclick="event.stopPropagation();editVod('${vod.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="icon-btn" title="delete" onclick="event.stopPropagation();deleteVod('${vod.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function getFilteredSorted() {
+  let filtered = [...vods];
+  if (currentFilter !== 'all') {
+    filtered = filtered.filter(v => {
+      const cat = (v.category || '').toLowerCase();
+      const tags = (v.tags || '').split(',').map(t => t.trim().toLowerCase());
+      return cat === currentFilter || tags.includes(currentFilter);
+    });
+  }
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(v =>
+      (v.title || '').toLowerCase().includes(q) ||
+      (v.tags || '').toLowerCase().includes(q) ||
+      (v.category || '').toLowerCase().includes(q)
+    );
+  }
+  if (currentSort === 'newest') filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+  else if (currentSort === 'oldest') filtered.sort((a,b) => new Date(a.date) - new Date(b.date));
+  else if (currentSort === 'longest') filtered.sort((a,b) => (b.duration||0) - (a.duration||0));
+  else if (currentSort === 'views') filtered.sort((a,b) => (b.views||0) - (a.views||0));
+  return filtered;
+}
+
+function renderGrid() {
+  const grid = document.getElementById('videoGrid');
+  const empty = document.getElementById('emptyState');
+  const filtered = getFilteredSorted();
+
+  // Remove existing cards
+  grid.querySelectorAll('.vod-card').forEach(c => c.remove());
+grid.querySelectorAll('#loadMoreBtn').forEach(c => c.parentNode && c.parentNode.remove());
+
+  if (filtered.length === 0) {
+    empty.classList.add('show');
+  } else {
+    empty.classList.remove('show');
+    filtered.slice(0, visibleCount).forEach((v, i) => {
+      grid.insertAdjacentHTML('beforeend', makeCard(v, i));
+    });
+    // Increment views on click
+    grid.querySelectorAll('.vod-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.dataset.id;
+        const v = vods.find(v => String(v.id) === String(id));
+        if (v) openVod(v.id);
+      });
+    });
+  }
+ if (filtered.length > visibleCount) {
+    const btn = document.createElement('div');
+    btn.style.cssText = 'grid-column:1/-1;text-align:center;padding:20px 0';
+    btn.innerHTML = `<button id="loadMoreBtn" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--font-mono);font-size:13px;padding:10px 28px;border-radius:10px;cursor:pointer;">load more (${filtered.length - visibleCount} left)</button>`;
+    grid.appendChild(btn);
+    document.getElementById('loadMoreBtn').addEventListener('click', loadMore);
+  }
+ function loadMore() {
+  visibleCount += 3;
+  renderGrid();
+}
+
+  updateStats();
+}
+
+function updateStats() {
+  document.getElementById('statVods').textContent = vods.length;
+  const totalViews = vods.reduce((a, v) => a + (v.views || 0), 0);
+  document.getElementById('statViews').textContent = formatViews(totalViews);
+  const filtered = getFilteredSorted();
+  document.getElementById('countBadge').textContent = filtered.length + ' vod' + (filtered.length !== 1 ? 's' : '');
+
+  // Update hero right column
+  const s2v = document.getElementById('statVods2');
+  const s2vw = document.getElementById('statViews2');
+  if (s2v) s2v.textContent = vods.length;
+  if (s2vw) s2vw.textContent = formatViews(totalViews);
+
+  const heroRight = document.getElementById('heroRight');
+  if (heroRight && vods.length > 0) {
+    heroRight.style.display = 'flex';
+    const latest = [...vods].sort((a,b) => new Date(b.date) - new Date(a.date))[0];
+    document.getElementById('heroLatestTitle').textContent = latest.title || 'untitled stream';
+    document.getElementById('heroLatestDur').textContent = formatDuration(latest.duration);
+    document.getElementById('heroLatestMeta').textContent = timeAgo(latest.date) + (latest.date ? ' · ' + formatDate(latest.date) : '');
+    const thumb = document.getElementById('heroLatestThumb');
+    if (latest.thumbnail) {
+      const img = document.createElement('img');
+      img.src = latest.thumbnail;
+      img.onerror = () => img.remove();
+      thumb.insertBefore(img, thumb.firstChild);
+    }
+    document.getElementById('heroLatestCard').onclick = () => openVod(latest.id);
+  }
+}
+
+// ─── FILTERS & SORT ───────────────────────────────────────
+function filterByTag(tag, el) {
+  visibleCount = 3;
+  currentFilter = tag;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderGrid();
+}
+
+function filterByTagName(tag) {
+  visibleCount = 3;
+  currentFilter = tag.toLowerCase();
+  // Снимаем активный чип со всех и ставим на совпадающий если есть
+  document.querySelectorAll('.chip').forEach(c => {
+    c.classList.remove('active');
+    if (c.textContent.trim().toLowerCase() === currentFilter) c.classList.add('active');
+  });
+  renderGrid();
+}
+
+function sortCards(val) {
+  currentSort = val;
+  renderGrid();
+}
+
+function filterCards() {
+  visibleCount = 3;
+  const desktopInput = document.getElementById('searchInput');
+  const mobileInput = document.getElementById('searchInputMobile');
+  searchQuery = (desktopInput ? desktopInput.value : '') || (mobileInput ? mobileInput.value : '');
+  renderGrid();
+}
+
+// ─── MODAL ────────────────────────────────────────────────
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('open');
+  // Set today's date
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('vodDate').value = today;
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  setTimeout(function() {
+    resetModal();
+  }, 350);
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function resetModal() {
+  document.getElementById('vodTitle').value = '';
+  document.getElementById('vodTags').value = '';
+  document.getElementById('uploadProgress').classList.remove('show');
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressFill').style.background = '';
+  document.getElementById('vodUrl').value = '';
+  document.getElementById('vodChat').value = '';
+  document.getElementById('vodThumbnail').value = '';
+  document.getElementById('vodDurH').value = '';
+  document.getElementById('vodDurM').value = '';
+  document.getElementById('vodDurS').value = '';
+
+  // Reset archive upload state
+  selectedFile = null;
+  archiveUrl = null;
+  document.getElementById('dropText').innerHTML = '<strong>click to upload</strong> or drag & drop';
+  document.getElementById('dropSub').textContent = 'mp4, webm, mkv — any size';
+  document.getElementById('dropZone').style.borderColor = '';
+  document.getElementById('dropIcon').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
+  document.getElementById('dropIcon').style.color = '';
+
+  document.querySelector('#modalOverlay .modal-title').textContent = 'upload recording';
+  document.querySelector('#modalOverlay .form-submit').textContent = 'publish recording';
+  document.querySelector('#modalOverlay .form-submit').onclick = submitVod;
+  window._editingVodId = null;
+}
+
+// ─── FILE HANDLING ─────────────────────────────────────────
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.add('dragover');
+}
+
+function handleDragLeave() {
+  document.getElementById('dropZone').classList.remove('dragover');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) setFile(file);
+}
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) setFile(file);
+}
+
+function setFile(file) {
+  selectedFile = file;
+  const mb = (file.size / 1024 / 1024).toFixed(1);
+  document.getElementById('fileLabel').textContent = `✓ ${file.name} (${mb} MB)`;
+  if (!document.getElementById('vodTitle').value) {
+    document.getElementById('vodTitle').value = file.name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
+  }
+}
+
+// ─── SUBMIT ───────────────────────────────────────────────
+// ─── ARCHIVE.ORG UPLOAD ───────────────────────────────────
+
+
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.add('dragover');
+}
+
+function handleDragLeave() {
+  document.getElementById('dropZone').classList.remove('dragover');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('video/')) setFile(file);
+}
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) setFile(file);
+}
+
+function setFile(file) {
+  selectedFile = file;
+  const mb = (file.size / 1024 / 1024).toFixed(1);
+  document.getElementById('dropText').innerHTML = `<strong>${file.name}</strong>`;
+  document.getElementById('dropSub').textContent = `${mb} MB — ready to upload`;
+  document.getElementById('dropZone').style.borderColor = 'var(--accent)';
+  document.getElementById('dropIcon').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  // Auto-fill title from filename
+  if (!document.getElementById('vodTitle').value) {
+    document.getElementById('vodTitle').value = file.name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
+  }
+
+  // Try to get duration from video metadata
+  const video = document.createElement('video');
+  video.preload = 'metadata';
+  video.onloadedmetadata = function() {
+    const dur = Math.floor(video.duration);
+    document.getElementById('vodDurH').value = Math.floor(dur / 3600);
+    document.getElementById('vodDurM').value = Math.floor((dur % 3600) / 60);
+    document.getElementById('vodDurS').value = dur % 60;
+    window.URL.revokeObjectURL(video.src);
+  };
+  video.src = window.URL.createObjectURL(file);
+
+  // Auto-start upload to archive.org
+  startArchiveUpload(file);
+}
+
+async function startArchiveUpload(file) {
+  const progress = document.getElementById('uploadProgress');
+  const fill = document.getElementById('progressFill');
+  const pct = document.getElementById('progressPct');
+  const txt = document.getElementById('progressText');
+  progress.classList.add('show');
+  txt.textContent = 'preparing upload…';
+
+  try {
+    // Step 1: Get upload URL from archive.org S3-like API
+    const identifier = 'cutierover-' + Date.now();
+    const collection = 'opensource'; // or your own collection
+
+    // Simulate progress while uploading (archive.org doesn't give real progress)
+    let p = 0;
+    const iv = setInterval(() => {
+      p += Math.random() * 8;
+      if (p >= 85) { p = 85; clearInterval(iv); }
+      fill.style.width = p + '%';
+      pct.textContent = Math.round(p) + '%';
+      if (p < 30) txt.textContent = 'connecting to archive.org…';
+      else if (p < 60) txt.textContent = 'uploading… this may take a while';
+      else txt.textContent = 'processing on archive.org…';
+    }, 3000);
+
+    // Use archive.org upload endpoint
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('identifier', identifier);
+    formData.append('collection', collection);
+    formData.append('mediatype', 'movies');
+    formData.append('title', document.getElementById('vodTitle').value || file.name);
+
+    // Upload via archive.org S3 API (anonymous upload)
+    const uploadRes = await fetch('https://s3.us.archive.org/' + identifier + '/' + encodeURIComponent(file.name), {
+      method: 'PUT',
+      headers: {
+        'Content-Type': file.type || 'video/mp4',
+        'x-amz-auto-make-bucket': '1',
+        'x-archive-meta01-collection': collection,
+        'x-archive-meta02-mediatype': 'movies',
+        'x-archive-meta03-title': document.getElementById('vodTitle').value || file.name,
+        'x-archive-meta04-creator': 'cutierover',
+        'x-archive-meta05-subject': 'stream;vod;gaming',
+        'x-archive-meta06-description': 'Stream recording from cutierover',
+        'x-archive-meta07-language': 'rus',
+        'x-archive-meta08-licenseurl': 'https://creativecommons.org/licenses/by/4.0/'
+      },
+      body: file
+    });
+
+    clearInterval(iv);
+
+    if (!uploadRes.ok) {
+      throw new Error('Archive.org upload failed: ' + uploadRes.status);
+    }
+
+    // Construct the direct link
+    archiveUrl = `https://archive.org/download/${identifier}/${encodeURIComponent(file.name)}`;
+
+    fill.style.width = '100%';
+    pct.textContent = '100%';
+    txt.textContent = 'uploaded! link ready';
+
+    // Auto-fill the URL field
+    document.getElementById('vodUrl').value = archiveUrl;
+
+    // Show success in drop zone
+    document.getElementById('dropText').innerHTML = '<strong>uploaded!</strong>';
+    document.getElementById('dropSub').textContent = 'publishing…';
+    document.getElementById('dropZone').style.borderColor = 'var(--live)';
+    document.getElementById('dropIcon').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+    document.getElementById('dropIcon').style.color = 'var(--live)';
+
+    // Auto-publish if enabled
+    if (document.getElementById('autoPublish').checked) {
+      setTimeout(() => submitVod(), 1500);
+    }
+
+  } catch(e) {
+    clearInterval(iv);
+    fill.style.width = '100%';
+    fill.style.background = '#f87171';
+    pct.textContent = 'error';
+    txt.textContent = 'upload failed — paste link manually';
+    console.error('Archive upload error:', e);
+  }
+}
+
+async function submitVod() {
+  const title = document.getElementById('vodTitle').value.trim();
+  if (!title) { document.getElementById('vodTitle').focus(); return; }
+
+  const progress = document.getElementById('uploadProgress');
+  const fill = document.getElementById('progressFill');
+  const pct = document.getElementById('progressPct');
+  const txt = document.getElementById('progressText');
+
+  // Only show progress if we were uploading a file
+  const wasUploading = selectedFile && archiveUrl;
+  if (wasUploading) {
+    progress.classList.add('show');
+  }
+
+  // Анимация прогресса
+  let p = 0;
+  const iv = setInterval(() => {
+    p += Math.random() * 15;
+    if (p >= 90) { p = 90; clearInterval(iv); }
+    fill.style.width = p + '%';
+    pct.textContent = Math.round(p) + '%';
+    if (p < 40) txt.textContent = 'saving…';
+    else txt.textContent = 'almost done…';
+  }, 200);
+
+  const newVod = {
+    title,
+    date: document.getElementById('vodDate').value,
+    category: document.getElementById('vodCategory').value,
+    tags: document.getElementById('vodTags').value,
+    duration: ((parseInt(document.getElementById('vodDurH').value)||0) * 3600) + ((parseInt(document.getElementById('vodDurM').value)||0) * 60) + (parseInt(document.getElementById('vodDurS').value)||0),
+    views: 0,
+    url: archiveUrl || document.getElementById('vodUrl').value.trim() || null,
+    thumbnail: document.getElementById('vodThumbnail').value.trim(),
+    chat_url: document.getElementById('vodChat').value.trim() || null
+  };
+
+  try {
+    const result = await insertVod(newVod);
+    clearInterval(iv);
+    fill.style.width = '100%';
+    pct.textContent = '100%';
+    txt.textContent = 'done!';
+    if (result && result[0]) vods.unshift(result[0]);
+    setTimeout(() => { closeModal(); renderGrid(); }, 600);
+  } catch(e) {
+    clearInterval(iv);
+    progress.classList.remove('show');
+    alert('Ошибка сохранения: ' + e.message);
+  }
+}
+
+// ─── ACTIONS ──────────────────────────────────────────────
+async function openVod(id) {
+  const vod = vods.find(v => String(v.id) === String(id));
+  if (!vod) return;
+
+  // Increment views in DB silently
+  incrementViews(id, vod.views || 0).catch(() => {});
+  vod.views = (vod.views || 0) + 1;
+
+  const overlay = document.getElementById('playerOverlay');
+  const title = document.getElementById('playerTitle');
+  const video = document.getElementById('videoPlayer');
+  const iframe = document.getElementById('iframePlayer');
+  const msg = document.getElementById('playerMsg');
+  const meta = document.getElementById('playerMeta');
+
+  title.textContent = vod.title || 'untitled stream';
+  video.style.display = 'none';
+  iframe.style.display = 'none';
+  msg.style.display = 'none';
+  video.src = '';
+  iframe.src = '';
+
+  const url = vod.url || '';
+
+  if (!url) {
+    msg.style.display = 'block';
+    msg.textContent = 'No video URL set for this recording.';
+  } else if (url.includes('drive.google.com')) {
+    // Convert Google Drive share link to embed
+    let embedUrl = url;
+    const fileIdMatch = url.match(/(?:\/d\/|id=)([a-zA-Z0-9_-]+)/);
+    if (fileIdMatch) {
+      embedUrl = 'https://drive.google.com/file/d/' + fileIdMatch[1] + '/preview';
+    }
+    iframe.src = embedUrl;
+    iframe.style.display = 'block';
+  } else if (url.includes('archive.org')) {
+    // archive.org embed
+    let embedUrl = url;
+    if (url.includes('/details/')) {
+      embedUrl = url.replace('/details/', '/embed/');
+    } else if (!url.includes('/embed/')) {
+      const id = url.split('/').pop();
+      embedUrl = 'https://archive.org/embed/' + id;
+    }
+    iframe.src = embedUrl;
+    iframe.style.display = 'block';
+  } else if (url.match(/\.(mp4|webm|mkv|mov|avi)(\?.*)?$/i)) {
+    video.src = url;
+    video.style.display = 'block';
+  } else {
+    // Try as direct video, fallback to iframe
+    video.src = url;
+    video.style.display = 'block';
+    video.onerror = function() {
+      video.style.display = 'none';
+      iframe.src = url;
+      iframe.style.display = 'block';
+    };
+  }
+
+  // Meta tags
+  const tags = (vod.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+  meta.innerHTML = [vod.category, ...tags].filter(Boolean).map(t =>
+    '<span style="font-size:12px;color:var(--text3);background:var(--bg4);padding:3px 10px;border-radius:4px;border:1px solid var(--border);">' + t + '</span>'
+  ).join('');
+
+  overlay.classList.add('open');
+
+  // ── CHAT REPLAY ──
+  window._chatData = null;
+  window._chatLastTime = -1;
+  const chatPanel = document.getElementById('chatPanel');
+  const chatMessages = document.getElementById('chatMessages');
+  const chatCount = document.getElementById('chatCount');
+  chatPanel.style.display = 'none';
+  chatMessages.innerHTML = '';
+
+  if (vod.chat_url) {
+    fetch(vod.chat_url)
+      .then(r => r.json())
+      .then(json => {
+        // TwitchDownloader format: { comments: [{content_offset_seconds, commenter, message}] }
+        // or array directly
+        let comments = Array.isArray(json) ? json : (json.comments || json.Comments || []);
+        window._chatData = comments.map(c => ({
+          time: c.content_offset_seconds ?? c.time ?? 0,
+          user: c.commenter?.display_name ?? c.user ?? 'user',
+          color: c.message?.user_color ?? c.color ?? '#c084fc',
+          text: (c.message?.body ?? c.text ?? '').trim()
+        })).filter(c => c.text).sort((a,b) => a.time - b.time);
+        chatCount.textContent = window._chatData.length.toLocaleString() + ' msgs';
+        chatPanel.style.display = 'flex';
+
+        // Poll video currentTime every 500ms
+        if (window._chatInterval) clearInterval(window._chatInterval);
+        window._chatLastTime = -1;
+        window._chatInterval = setInterval(() => {
+          const videoEl = document.getElementById('videoPlayer');
+          const t = videoEl.style.display !== 'none' ? videoEl.currentTime : null;
+          if (t === null || window._chatLastTime === Math.floor(t)) return;
+          window._chatLastTime = Math.floor(t);
+
+          // Show messages from t-3s to t
+          const visible = window._chatData.filter(c => c.time >= t - 3 && c.time <= t);
+          if (visible.length === 0) return;
+
+          visible.forEach(c => {
+            const div = document.createElement('div');
+            div.style.cssText = 'padding:4px 12px;font-size:13px;line-height:1.4;font-family:var(--font-sans);';
+            div.innerHTML = `<span style="color:${c.color || '#c084fc'};font-weight:600;font-size:12px;">${escHtml(c.user)}</span> <span style="color:var(--text2);">${escHtml(c.text)}</span>`;
+            chatMessages.appendChild(div);
+          });
+
+          // Keep max 200 messages in DOM
+          while (chatMessages.children.length > 200) chatMessages.removeChild(chatMessages.firstChild);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 500);
+      })
+      .catch(() => { chatPanel.style.display = 'none'; });
+  }
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function closePlayer() {
+  document.getElementById('playerOverlay').classList.remove('open');
+  setTimeout(function() {
+    document.getElementById('videoPlayer').pause && document.getElementById('videoPlayer').pause();
+    document.getElementById('videoPlayer').src = '';
+    document.getElementById('iframePlayer').src = '';
+    const chatPanel = document.getElementById('chatPanel');
+    chatPanel.style.display = 'none';
+    document.getElementById('chatMessages').innerHTML = '';
+    if (window._chatInterval) { clearInterval(window._chatInterval); window._chatInterval = null; }
+    window._chatData = null;
+  }, 350);
+}
+
+function handlePlayerOverlayClick(e) {
+  if (e.target === document.getElementById('playerOverlay')) closePlayer();
+}
+
+function editVod(id) {
+  const vod = vods.find(v => String(v.id) === String(id));
+  if (!vod) return;
+  window._editingVodId = id;
+
+  const dur = vod.duration || 0;
+  document.getElementById('vodDurH').value = Math.floor(dur / 3600);
+  document.getElementById('vodDurM').value = Math.floor((dur % 3600) / 60);
+  document.getElementById('vodDurS').value = dur % 60;
+  document.getElementById('vodTitle').value = vod.title || '';
+  document.getElementById('vodDate').value = vod.date || '';
+  document.getElementById('vodCategory').value = vod.category || 'gaming';
+  document.getElementById('vodTags').value = vod.tags || '';
+  document.getElementById('vodUrl').value = vod.url || '';
+  document.getElementById('vodChat').value = vod.chat_url || '';
+  document.getElementById('vodThumbnail').value = vod.thumbnail || '';
+
+  document.querySelector('#modalOverlay .modal-title').textContent = 'edit recording';
+  document.querySelector('#modalOverlay .form-submit').textContent = 'save changes';
+  document.querySelector('#modalOverlay .form-submit').onclick = saveEditVod;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+async function saveEditVod() {
+  const id = window._editingVodId;
+  if (!id) return;
+  const title = document.getElementById('vodTitle').value.trim();
+  if (!title) { document.getElementById('vodTitle').focus(); return; }
+
+  const updated = {
+    title,
+    date: document.getElementById('vodDate').value,
+    category: document.getElementById('vodCategory').value,
+    tags: document.getElementById('vodTags').value,
+    duration: ((parseInt(document.getElementById('vodDurH').value)||0) * 3600) + ((parseInt(document.getElementById('vodDurM').value)||0) * 60) + (parseInt(document.getElementById('vodDurS').value)||0),
+    url: archiveUrl || document.getElementById('vodUrl').value.trim() || null,
+    thumbnail: document.getElementById('vodThumbnail').value.trim(),
+    chat_url: document.getElementById('vodChat').value.trim() || null
+  };
+
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/vods?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + supabaseSession.access_token,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(updated)
+    });
+    const idx = vods.findIndex(v => String(v.id) === String(id));
+    if (idx !== -1) vods[idx] = { ...vods[idx], ...updated };
+    window._editingVodId = null;
+    closeModal();
+    renderGrid();
+  } catch(e) {
+    alert('Ошибка сохранения: ' + e.message);
+  }
+}
+
+async function deleteVod(id) {
+  if (!confirm('Delete this recording?')) return;
+  try {
+    await deleteVodDb(id);
+    vods = vods.filter(v => String(v.id) !== String(id));
+    renderGrid();
+  } catch(e) {
+    alert('Ошибка удаления: ' + e.message);
+  }
+}
+
+// ─── AUTH ─────────────────────────────────────────────────
+let isAdmin = false;
+let supabaseSession = null;
+let archiveUrl = null;
+let selectedFile = null;
+
+async function signIn(email, password) {
+  const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error_description || data.msg || 'login failed');
+  return data;
+}
+
+async function signOut() {
+  if (!supabaseSession) return;
+  await fetch(SUPABASE_URL + '/auth/v1/logout', {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + supabaseSession.access_token
+    }
+  });
+  supabaseSession = null;
+  sessionStorage.removeItem('cutierover_session');
+}
+
+async function initAuth() {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem('cutierover_session'));
+    if (saved && saved.expires_at > Date.now() / 1000) {
+      supabaseSession = saved;
+      setAdminMode(true);
+      return;
+    }
+  } catch {}
+  setAdminMode(false);
+}
+
+function setAdminMode(admin) {
+  isAdmin = admin;
+  document.getElementById('uploadBtn').style.display = admin ? 'inline-flex' : 'none';
+  document.getElementById('adminBadge').style.display = admin ? 'inline-flex' : 'none';
+  document.getElementById('loginBtn').style.display = admin ? 'none' : 'inline-flex';
+  renderGrid();
+}
+
+function openAuthModal() {
+  document.getElementById('authError').textContent = '';
+  document.getElementById('authEmail').value = '';
+  document.getElementById('authPassword').value = '';
+  document.getElementById('authOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('authEmail').focus(), 50);
+}
+
+function closeAuthModal() {
+  document.getElementById('authOverlay').classList.remove('open');
+  setTimeout(function() {
+    document.getElementById('authError').textContent = '';
+    document.getElementById('authEmail').value = '';
+    document.getElementById('authPassword').value = '';
+  }, 350);
+}
+
+function closeSupport() {
+  document.getElementById('supportOverlay').classList.remove('open');
+}
+
+async function submitAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const pw = document.getElementById('authPassword').value;
+  if (!email || !pw) return;
+
+  const btn = document.querySelector('#authOverlay .auth-btn');
+  btn.textContent = 'signing in…';
+  btn.disabled = true;
+
+  try {
+    const session = await signIn(email, pw);
+    supabaseSession = session;
+    sessionStorage.setItem('cutierover_session', JSON.stringify(session));
+    closeAuthModal();
+    setAdminMode(true);
+  } catch(e) {
+    document.getElementById('authError').textContent = 'wrong email or password';
+    document.getElementById('authPassword').value = '';
+    document.getElementById('authPassword').focus();
+  } finally {
+    btn.textContent = 'sign in';
+    btn.disabled = false;
+  }
+}
+
+async function logoutAdmin() {
+  await signOut();
+  setAdminMode(false);
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+// ─── TWITCH LIVE STATUS ───────────────────────────────────
+async function fetchTwitchData() {
+  try {
+    // Используем ivr.fi — публичный unofficial Twitch API proxy
+const [userRes] = await Promise.all([
+  fetch('https://api.ivr.fi/v2/twitch/user?login=cutierover')
+]);
+
+if (userRes.ok) {
+  const users = await userRes.json();
+  const user = Array.isArray(users) ? users[0] : users;
+  if (user && user.followers !== undefined) {
+    const f = user.followers;
+    document.getElementById('statFollowers').textContent =
+      f >= 1000 ? (f / 1000).toFixed(1) + 'k' : f;
+  }
+}
+
+const streamRes = await fetch('https://decapi.me/twitch/uptime/cutierover');
+const streamText = await streamRes.text();
+const isLive = !streamText.includes('offline') && !streamText.includes('error');
+
+const dot = document.getElementById('liveIndicator');
+const label = document.getElementById('liveLabel');
+const viewersEl = document.getElementById('statViewers');
+
+if (isLive) {
+  dot.style.background = 'var(--live)';
+  dot.style.boxShadow = '0 0 6px var(--live)';
+  dot.style.animation = 'blink 1.2s infinite';
+  label.textContent = 'live now';
+  label.style.color = 'var(--live)';
+  try {
+    const viewersRes = await fetch('https://decapi.me/twitch/viewercount/cutierover');
+    const viewersText = await viewersRes.text();
+    const v = parseInt(viewersText.trim());
+    if (viewersEl && !isNaN(v)) {
+      viewersEl.textContent = v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v;
+    }
+  } catch(e) {
+    if (viewersEl) viewersEl.textContent = '—';
+  }
+} else {
+  dot.style.background = '#f87171';
+  dot.style.boxShadow = '0 0 6px #f87171';
+  dot.style.animation = 'none';
+  label.textContent = 'offline';
+  label.style.color = '#f87171';
+  if (viewersEl) viewersEl.textContent = '—';
+}
+} catch(e) {
+    const dot = document.getElementById('liveIndicator');
+    dot.style.background = '#f87171';
+    dot.style.boxShadow = '0 0 6px #f87171';
+    dot.style.animation = 'none';
+    document.getElementById('liveLabel').textContent = 'offline';
+    document.getElementById('liveLabel').style.color = '#f87171';
+    document.getElementById('statFollowers').textContent = '220k+';
+}
+}
+
+async function init() {
+  // Показываем загрузку
+  const grid = document.getElementById('videoGrid');
+  grid.insertAdjacentHTML('afterbegin', `
+    <div id="loadingState" style="grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--text3);font-family:var(--font-mono);font-size:13px;">
+      loading recordings…
+    </div>
+  `);
+
+  await initAuth();
+  vods = await loadVods();
+
+  const loading = document.getElementById('loadingState');
+  if (loading) loading.remove();
+
+  renderGrid();
+  fetchTwitchData();
+}
+
+init();
+
+
+// Плавный скролл для якорных ссылок
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    const href = this.getAttribute('href');
+    if (href !== '#') {
+      e.preventDefault();
+      const target = document.querySelector(href);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+</script>
+<!-- Модальное окно поддержки -->
+<div class="support-overlay" id="supportOverlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="support-modal">
+    <button class="support-modal-close" onclick="closeSupport()">×</button>
+    <p class="support-modal-title">Поддержать создателя сайта ♡</p>
+    <p class="support-modal-sub">Выбери удобный способ</p>
+
+    <a class="support-da-btn" href="https://www.donationalerts.com/r/voicecoretm" target="_blank">
+      donation alerts
+    </a>
+
+    <div class="support-method">
+      <div class="support-method-label">USDT TRC-20</div>
+      <div class="support-method-row">
+        <span class="support-method-val">TS9YcNXxWcJ5tMU8KRm2t8GvvHdv1FiorG</span>
+        <button class="support-copy-btn" onclick="
+          navigator.clipboard.writeText('TS9YcNXxWcJ5tMU8KRm2t8GvvHdv1FiorG');
+          this.textContent='скопировано ✓';
+          setTimeout(()=>this.textContent='копировать',2000)
+        ">копировать</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="intro">
+  <div class="intro-orb orb-1"></div>
+  <div class="intro-orb orb-2"></div>
+  <div class="intro-orb orb-3"></div>
+  <div class="intro-content">
+    <div class="intro-logo">
+      <div class="intro-logo-mark">✦</div>
+    </div>
+    <div class="intro-title">
+      <span>c</span><span>u</span><span>t</span><span>i</span><span>e</span><span>r</span><span>o</span><span>v</span><span>e</span><span>r</span>
+    </div>
+    <div class="intro-subtitle">stream archive</div>
+    <div class="intro-line"></div>
+  </div>
+</div>
+
+<style>
+#intro {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #0a0a0f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  animation: introFadeOut 0.8s cubic-bezier(0.4, 0, 0.2, 1) 3.2s forwards;
+  pointer-events: none;
+}
+#intro.intro-done {
+  display: none !important;
+}
+.intro-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  opacity: 0;
+  animation: orbFadeIn 1s ease 0.3s forwards;
+}
+.intro-orb.orb-1 {
+  width: 400px; height: 400px;
+  top: 20%; left: 30%;
+  background: radial-gradient(circle, #7c3aed 0%, transparent 70%);
+  animation: orbFadeIn 1s ease 0.3s forwards, orbFloat1 8s ease-in-out 1s infinite;
+}
+.intro-orb.orb-2 {
+  width: 300px; height: 300px;
+  bottom: 25%; right: 25%;
+  background: radial-gradient(circle, #db2777 0%, transparent 70%);
+  animation: orbFadeIn 1s ease 0.5s forwards, orbFloat2 10s ease-in-out 1.2s infinite;
+}
+.intro-orb.orb-3 {
+  width: 250px; height: 250px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, #4f46e5 0%, transparent 70%);
+  animation: orbFadeIn 1s ease 0.7s forwards, orbFloat3 12s ease-in-out 1.4s infinite;
+}
+@keyframes orbFadeIn {
+  from { opacity: 0; }
+  to { opacity: 0.35; }
+}
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -20px) scale(1.15); }
+}
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-25px, 15px) scale(1.2); }
+}
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(calc(-50% + 20px), calc(-50% - 15px)) scale(1.1); }
+}
+.intro-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.intro-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #c084fc, #f472b6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 40px rgba(192,132,252,0.3), 0 0 80px rgba(192,132,252,0.1);
+  opacity: 0;
+  transform: scale(0.5) rotate(-10deg);
+  animation: logoIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
+}
+.intro-logo-mark {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 28px;
+  color: #fff;
+}
+@keyframes logoIn {
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+.intro-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 400;
+  color: #f0eef8;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  display: flex;
+  gap: 2px;
+}
+.intro-title span {
+  opacity: 0;
+  transform: translateY(20px);
+  display: inline-block;
+  animation: letterIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.intro-title span:nth-child(1) { animation-delay: 0.6s; }
+.intro-title span:nth-child(2) { animation-delay: 0.65s; }
+.intro-title span:nth-child(3) { animation-delay: 0.7s; }
+.intro-title span:nth-child(4) { animation-delay: 0.75s; }
+.intro-title span:nth-child(5) { animation-delay: 0.8s; }
+.intro-title span:nth-child(6) { animation-delay: 0.85s; }
+.intro-title span:nth-child(7) { animation-delay: 0.9s; }
+.intro-title span:nth-child(8) { animation-delay: 0.95s; }
+.intro-title span:nth-child(9) { animation-delay: 1.0s; }
+.intro-title span:nth-child(10) { animation-delay: 1.05s; }
+@keyframes letterIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.intro-subtitle {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: #9c98b4;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  opacity: 0;
+  animation: fadeIn 0.8s ease 1.3s forwards;
+}
+.intro-line {
+  width: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c084fc, #f472b6, transparent);
+  margin-top: 8px;
+  animation: lineExpand 1s cubic-bezier(0.4, 0, 0.2, 1) 1.5s forwards;
+}
+@keyframes lineExpand {
+  to { width: 120px; }
+}
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+@keyframes introFadeOut {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-30px) scale(0.98); }
+}
+@media (max-width: 768px) {
+  .intro-orb { display: none; }
+  .intro-title { font-size: 2.2rem; }
+}
+</style>
+
+<script>
+setTimeout(() => {
+  const intro = document.getElementById('intro');
+  if (intro) {
+    intro.classList.add('intro-done');
+    intro.remove();
+  }
+}, 4200);
+</script>
+
+
+<script>
+(function(){
+  var canvas = document.getElementById('particleCanvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var particles = [];
+  var mouse = { x: null, y: null };
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  window.addEventListener('mousemove', function(e) {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+  });
+
+  window.addEventListener('mouseleave', function() {
+    mouse.x = null;
+    mouse.y = null;
+  });
+
+  function Particle() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 2 + 0.5;
+    this.speedX = (Math.random() - 0.5) * 0.3;
+    this.speedY = (Math.random() - 0.5) * 0.3;
+    this.opacity = Math.random() * 0.5 + 0.1;
+    var colors = ['192,132,252', '244,114,182', '124,58,237', '219,39,119', '79,70,229'];
+    this.color = colors[Math.floor(Math.random() * colors.length)];
+  }
+
+  Particle.prototype.update = function() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+    if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+    if (mouse.x != null) {
+      var dx = mouse.x - this.x;
+      var dy = mouse.y - this.y;
+      var distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance < 150) {
+        var force = (150 - distance) / 150;
+        this.x -= dx * force * 0.02;
+        this.y -= dy * force * 0.02;
+      }
+    }
+  };
+
+  Particle.prototype.draw = function() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(' + this.color + ',' + this.opacity + ')';
+    ctx.fill();
+  };
+
+  var particleCount = Math.min(60, Math.floor((canvas.width * canvas.height) / 20000));
+  for (var i = 0; i < particleCount; i++) {
+    particles.push(new Particle());
+  }
+
+  function connect() {
+    for (var a = 0; a < particles.length; a++) {
+      for (var b = a + 1; b < particles.length; b++) {
+        var dx = particles[a].x - particles[b].x;
+        var dy = particles[a].y - particles[b].y;
+        var distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 100) {
+          ctx.beginPath();
+          ctx.strokeStyle = 'rgba(192,132,252,' + (0.08 * (1 - distance / 100)) + ')';
+          ctx.lineWidth = 0.5;
+          ctx.moveTo(particles[a].x, particles[a].y);
+          ctx.lineTo(particles[b].x, particles[b].y);
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var i = 0; i < particles.length; i++) {
+      particles[i].update();
+      particles[i].draw();
+    }
+    connect();
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+})();
+</script>
 </body>
 </html>
